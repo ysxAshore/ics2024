@@ -144,7 +144,7 @@ static bool make_token(char *e)
           }
           else
           {
-            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            strncpy(tokens[nr_token].str, substr_start, substr_len - 1);
             ++nr_token;
           }
           break;
@@ -234,11 +234,6 @@ int getTheMainOp(int p, int q)
       if (tokens[op].type == '+' || tokens[op].type == '-')
       { // 只有ｉ表示+/-才替换
         if (tokens[i].type == '+' || tokens[i].type == '-')
-          op = i;
-      }
-      else if (tokens[op].type == '*' || tokens[op].type == '/')
-      {
-        if (tokens[i].type == '+' || tokens[i].type == '-') // mul div
           op = i;
       }
       else if (tokens[op].type == '_') // _+2 _5+_2
