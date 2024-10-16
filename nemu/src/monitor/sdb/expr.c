@@ -192,6 +192,10 @@ bool check_parentheses(int p, int q)
       error = 1;
       return false;
     }
+    if (i == 0 && j != q)
+    {
+      return false;
+    }
   }
   if (i == 0)
     return true;
