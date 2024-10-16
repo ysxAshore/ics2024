@@ -20,6 +20,7 @@
  */
 #include <regex.h>
 #include <stdlib.h>
+#include <string.h>
 
 enum
 {
@@ -165,12 +166,11 @@ static bool make_token(char *e)
         default:
         }
       }
-    }
-
-    if (i == NR_REGEX)
-    {
-      printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
-      return false;
+      if (i == NR_REGEX)
+      {
+        printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
+        return false;
+      }
     }
   }
 
