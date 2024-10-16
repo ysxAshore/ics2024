@@ -299,7 +299,7 @@ word_t expr(char *e, bool *success)
   {
     if (tokens[i].type == '-' &&
         (i == 0 ||
-         (i > 0 && tokens[i - 1].type != ')' && tokens[i - 1].type != 'd')))
+         (i > 0 && tokens[i - 1].type != ')' && tokens[i - 1].type != 'd' && tokens[i - 1].type != '_')))
       tokens[i].type = '_';
   }
   error = 0;
