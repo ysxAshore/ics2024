@@ -158,7 +158,7 @@ static int cmd_p(char *args)
     bool *sign = NULL;
     uint32_t ans = expr(args, sign);
     if (sign == NULL)
-      printf("%d", ans);
+      printf("%d\n", ans);
     else
       printf("The expr(%s) is not correct expression", args);
   }

@@ -203,6 +203,8 @@ int getTheMainOp(int p, int q)
   int op = p;
   for (int i = p; i <= q; i++)
   {
+    if (tokens[i].type == 'd')
+      continue;
     if (tokens[i].type == '(')
     { // 匹配到相对应的右括号
       int sum = 1;
