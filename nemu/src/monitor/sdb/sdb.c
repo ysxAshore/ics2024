@@ -148,6 +148,22 @@ static int cmd_x(char *args)
   }
   return 0;
 }
+
+static int cmd_p(char *args)
+{
+  if (args == NULL)
+    printf("p cmd needs one or more arguments");
+  else
+  {
+    bool *sign = NULL;
+    uint32_t ans = expr(args, sign);
+    if (sign == NULL)
+      printf("%d", ans);
+    else
+      printf("The expr(%s) is not correct expression", args);
+  }
+  return 0;
+}
 static struct
 {
   const char *name;
@@ -162,6 +178,7 @@ static struct
     {"si", "'si N' excute program of N step(s)", cmd_si},
     {"info", "'info r/w' print the information of registers or watches", cmd_info},
     {"x", "'x N address' print the N memory from address beginning", cmd_x},
+    {"p", "'p expr' print the answer of expr", cmd_p},
 
 };
 
