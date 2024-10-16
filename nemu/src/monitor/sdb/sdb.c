@@ -47,19 +47,50 @@ static char *rl_gets()
 
 static int cmd_c(char *args)
 {
-  cpu_exec(-1);
+  if (args == NULL)
+  {
+    cpu_exec(-1);
+  }
+  else
+  {
+    printf("Unknown command 'c %s'\n", args);
+  }
   return 0;
 }
 
 static int cmd_q(char *args)
 {
-  nemu_state.state = NEMU_QUIT;
-  cpu_exec(1);
+  if (args == NULL)
+  {
+    nemu_state.state = NEMU_QUIT;
+    cpu_exec(1);
+  }
+  else
+  {
+    printf("Unknown command 'q %s\n", args);
+  }
   return -1;
 }
 
 static int cmd_help(char *args);
 
+static int cmd_si(char *args)
+{
+  int N = 1;
+  if (args != NULL)
+  {
+    if (strspn(args, "0123456789") == strlen(args))
+    {
+      N = atoi(args);
+    }
+    else
+    {
+      printf("Unknown command 'si %s\n", args);
+    }
+  }
+  cpu_exec(N);
+  return 0;
+}
 static struct
 {
   const char *name;
@@ -71,7 +102,7 @@ static struct
     {"q", "Exit NEMU", cmd_q},
 
     /* TODO: Add more commands */
-
+    {"si", "'si N' excute program of N step(s)", cmd_si},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -92,9 +123,10 @@ static int cmd_help(char *args)
   }
   else
   {
+    char *tmp = strtok(NULL, " ");
     for (i = 0; i < NR_CMD; i++)
     {
-      if (strcmp(arg, cmd_table[i].name) == 0)
+      if (strcmp(arg, cmd_table[i].name) == 0 && tmp == NULL)
       {
         printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
         return 0;
