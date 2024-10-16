@@ -144,7 +144,7 @@ static bool make_token(char *e)
           }
           else
           {
-            strncpy(tokens[nr_token].str, substr_start, substr_len - 1);
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
             ++nr_token;
           }
           break;
