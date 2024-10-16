@@ -174,7 +174,8 @@ static int cmd_test(char *args)
   {
     char *result = strtok(buf, " ");
     bool *success = NULL;
-    uint32_t res = expr(buf + strlen(result), success);
+    char *expression = buf + strlen(result);
+    uint32_t res = expr(expression, success);
     if (success == NULL)
     {
       sprintf(myRes, "%u", res);
