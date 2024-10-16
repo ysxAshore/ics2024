@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include <cpu/cpu.h>
+#include <memory/paddr.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
@@ -124,6 +125,29 @@ static int cmd_info(char *args)
   }
   return 0;
 }
+
+static int cmd_x(char *args)
+{
+  char *num = strtok(NULL, " ");
+  char *address = strtok(NULL, " ");
+  int N = 0;
+  paddr_t begin = CONFIG_MBASE;
+  if (num == NULL || address == NULL)
+  {
+    printf("unknown command,the x command must need two aurguments- num and address\n");
+  }
+  else
+  {
+    N = atoi(num); // 没检测，由函数去做
+    begin = (paddr_t)strtoul(address, NULL, 16);
+    for (int i = 0; i < N; ++i)
+    {
+      printf("%#x: %#lX\n", begin, paddr_read(begin, 4));
+      begin = begin + 4;
+    }
+  }
+  return 0;
+}
 static struct
 {
   const char *name;
@@ -137,6 +161,8 @@ static struct
     /* TODO: Add more commands */
     {"si", "'si N' excute program of N step(s)", cmd_si},
     {"info", "'info r/w' print the information of registers or watches", cmd_info},
+    {"x", "'x N address' print the N memory from address beginning", cmd_x},
+
 };
 
 #define NR_CMD ARRLEN(cmd_table)
