@@ -236,6 +236,11 @@ int getTheMainOp(int p, int q)
         if (tokens[i].type == '+' || tokens[i].type == '-')
           op = i;
       }
+      else if (tokens[op].type == '*' || tokens[op].type == '/')
+      {
+        if (tokens[i].type == '*' || tokens[i].type == '/')
+          op = i;
+      }
       else if (tokens[op].type == '_') // _+2 _5+_2
       {
         if (i == op + 1 && (tokens[i].type == '+' || tokens[i].type == '-'))
@@ -245,8 +250,6 @@ int getTheMainOp(int p, int q)
           op = i;
         }
       }
-      else if (i == op + 1 && tokens[i].type == '_') //-5*-2
-        ;
       else
         op = i;
     }
