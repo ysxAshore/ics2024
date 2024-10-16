@@ -92,6 +92,38 @@ static int cmd_si(char *args)
   cpu_exec(N);
   return 0;
 }
+
+static int cmd_info(char *args)
+{
+  char *arg = strtok(NULL, " ");
+  if (arg == NULL)
+  {
+    printf("Unknown command,info needs a subcmd,like r or w\n");
+  }
+  else
+  {
+    char *tmp = strtok(NULL, " ");
+    if (tmp == NULL)
+    {
+      if (strcmp(arg, "r") == 0)
+      {
+        isa_reg_display();
+      }
+      else if (strcmp(arg, "w") == 0)
+      {
+      }
+      else
+      {
+        printf("now the info only is supported to display the status of registers and watches");
+      }
+    }
+    else
+    {
+      printf("Unknown command,info only needs a subcmd,like r or w\n");
+    }
+  }
+  return 0;
+}
 static struct
 {
   const char *name;
@@ -104,6 +136,7 @@ static struct
 
     /* TODO: Add more commands */
     {"si", "'si N' excute program of N step(s)", cmd_si},
+    {"info", "'info r/w' print the information of registers or watches", cmd_info},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
