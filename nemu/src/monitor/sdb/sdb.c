@@ -167,7 +167,7 @@ static int cmd_p(char *args)
 
 static int cmd_test(char *args)
 {
-  FILE *fp = popen("tools/gen-expr/output.txt", "r");
+  FILE *fp = fopen("tools/gen-expr/output.txt", "r");
   assert(fp != NULL);
   char buf[1000], myRes[10];
   while (fgets(buf, 1000, fp) != NULL)
