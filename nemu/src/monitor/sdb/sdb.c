@@ -164,6 +164,30 @@ static int cmd_p(char *args)
   }
   return 0;
 }
+
+static int cmd_test(char *args)
+{
+  FILE *fp = popen("tools/gen-expr/output.txt", "r");
+  assert(fp != NULL);
+  char buf[1000], myRes[10];
+  while (fgets(buf, 1000, fp) != NULL)
+  {
+    char *result = strtok(buf, " ");
+    bool *success = NULL;
+    uint32_t res = expr(buf + strlen(result), success);
+    if (success == NULL)
+    {
+      sprintf(myRes, "%u", res);
+      if (strcmp(result, myRes) == 0)
+      {
+        printf("%s=%s success", buf + strlen(result), result);
+        continue;
+      }
+    }
+    printf("%s=%s falied", buf + strlen(result), result);
+  }
+  return 0;
+}
 static struct
 {
   const char *name;
@@ -179,6 +203,7 @@ static struct
     {"info", "'info r/w' print the information of registers or watches", cmd_info},
     {"x", "'x N address' print the N memory from address beginning", cmd_x},
     {"p", "'p expr' print the answer of expr", cmd_p},
+    {"test", "test the function of expr", cmd_test},
 
 };
 
