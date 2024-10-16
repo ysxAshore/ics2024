@@ -86,6 +86,7 @@ static int cmd_si(char *args)
     else
     {
       printf("Unknown command 'si %s\n", args);
+      return 0;
     }
   }
   cpu_exec(N);
