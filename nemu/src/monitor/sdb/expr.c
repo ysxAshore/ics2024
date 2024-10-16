@@ -238,7 +238,7 @@ int getTheMainOp(int p, int q)
       }
       else if (tokens[op].type == '*' || tokens[op].type == '/')
       {
-        if (tokens[i].type == '*' || tokens[i].type == '/')
+        if (tokens[i].type == '+' || tokens[i].type == '-') // mul div
           op = i;
       }
       else if (tokens[op].type == '_') // _+2 _5+_2
