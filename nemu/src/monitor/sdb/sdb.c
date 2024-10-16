@@ -169,13 +169,13 @@ static int cmd_test(char *args)
 {
   FILE *fp = fopen("tools/gen-expr/output.txt", "r");
   assert(fp != NULL);
-  char buf[1000], myRes[10];
+  char buf[1000], myRes[10], myExpr[1000];
   while (fgets(buf, 1000, fp) != NULL)
   {
     char *result = strtok(buf, " ");
     bool *success = NULL;
-    char *expression = buf + strlen(result);
-    uint32_t res = expr(expression, success);
+    strncpy(myExpr, buf + strlen(result), strlen(buf) - strlen(result));
+    uint32_t res = expr(myExpr, success);
     if (success == NULL)
     {
       sprintf(myRes, "%u", res);
