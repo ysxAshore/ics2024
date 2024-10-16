@@ -173,7 +173,7 @@ static int cmd_test(char *args)
   while (fgets(buf, sizeof(buf), fp) != NULL)
   {
     char *ref_result = strtok(buf, " ");
-    char *ref_expr = strtok(NULL, " ");
+    char *ref_expr = strtok(NULL, "\n");
     bool *success = NULL;
     uint32_t res = expr(ref_expr, success);
     if (success == NULL)
