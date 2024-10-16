@@ -169,23 +169,25 @@ static int cmd_test(char *args)
 {
   FILE *fp = fopen("tools/gen-expr/output.txt", "r");
   assert(fp != NULL);
-  char buf[1000], myRes[10], myExpr[1000];
-  while (fgets(buf, 1000, fp) != NULL)
+  char ref_expr[1000];
+  char myRes[10], refRes[10];
+  while (!feof(fp))
   {
-    char *result = strtok(buf, " ");
+    if (fscanf(fp, "%s %s", refRes, ref_expr) < 2)
+    {
+    }
     bool *success = NULL;
-    strncpy(myExpr, buf + strlen(result), strlen(buf) - strlen(result));
-    uint32_t res = expr(myExpr, success);
+    uint32_t res = expr(ref_expr, success);
     if (success == NULL)
     {
       sprintf(myRes, "%u", res);
-      if (strcmp(result, myRes) == 0)
+      if (strcmp(refRes, myRes) == 0)
       {
-        printf("%s=%s success", buf + strlen(result), result);
+        printf("%s=%s success", ref_expr, refRes);
         continue;
       }
     }
-    printf("%s=%s falied", buf + strlen(result), result);
+    printf("%s=%s falied", ref_expr, refRes);
   }
   return 0;
 }
