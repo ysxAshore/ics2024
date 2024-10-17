@@ -1,0 +1,6 @@
+[1;34m[src/utils/log.c:30 init_log] Log is written to /home/ysxashore/Projects/ics2024/nemu/build/nemu-log.txt[0m
+[1;34m[src/memory/paddr.c:50 init_mem] physical memory area [0x80000000, 0x87ffffff][0m
+[1;34m[src/monitor/monitor.c:49 load_img] No image is given. Use the default build-in image.[0m
+[1;34m[src/cpu/cpu-exec.c:103 statistic] host time spent = 0 us[0m
+[1;34m[src/cpu/cpu-exec.c:104 statistic] total guest instructions = 0[0m
+[1;34m[src/cpu/cpu-exec.c:108 statistic] Finish running in less than 1 us and can not calculate the simulation frequency[0m
