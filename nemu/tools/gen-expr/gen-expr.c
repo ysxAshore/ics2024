@@ -117,6 +117,7 @@ uint16_t getFirstNotEmpty(int begin)
       return i;
   }
 }
+// 浮点异常
 int main(int argc, char *argv[])
 {
   int seed = time(0);
