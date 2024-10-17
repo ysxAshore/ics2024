@@ -21,7 +21,7 @@
 #include <regex.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
+#include <memory/vaddr.h>
 
 enum
 {
@@ -289,19 +289,6 @@ int getTheMainOp(int p, int q)
       }
       else
         op = i;
-      // else if (tokens[op].type == '_')
-      // {
-      //   if (tokens[op].type == '_' || tokens[op].type == DEREF)
-      //   {
-      //     /* code */
-      //   }
-      // }
-      // else if (tokens[op].type == DEREF) // *+5  *-5 *x5
-      // {
-      //   if (i == op + 1 && (tokens[i].type == '+' || tokens[i].type == '-' || tokens))
-      // }
-      // else
-      //   op = i;
     }
   }
   return op;
@@ -343,8 +330,7 @@ u_int32_t eval(int p, int q)
     case TK_AND:
       return val1 && val2;
     case DEREF:
-      u_int32_t *p = (u_int32_t *)(uintptr_t)val2;
-      return *p;
+      return vaddr_read(val2, sizeof(uint32_t));
     default:
       error = 1;
     }

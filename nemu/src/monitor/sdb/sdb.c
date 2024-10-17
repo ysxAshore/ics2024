@@ -15,7 +15,7 @@
 
 #include <isa.h>
 #include <cpu/cpu.h>
-#include <memory/paddr.h>
+#include <memory/vaddr.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
@@ -142,7 +142,7 @@ static int cmd_x(char *args)
     begin = (paddr_t)strtoul(address, NULL, 16);
     for (int i = 0; i < N; ++i)
     {
-      printf("%#x: %#lX\n", begin, paddr_read(begin, 4));
+      printf("%#x: %#lX\n", begin, vaddr_read(begin, 4));
       begin = begin + 4;
     }
   }
