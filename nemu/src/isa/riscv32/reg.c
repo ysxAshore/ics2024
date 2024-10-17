@@ -35,7 +35,7 @@ word_t isa_reg_str2val(const char *s, bool *success)
   int find = 0, i = 0;
   for (; i < 32; i++)
   {
-    if (strcmp(regs[i], s) == 0)
+    if (strcmp(regs[i], s) == 0 || strcmp(regs[i], s + 1) == 0)
     {
       find = 1;
       break;
