@@ -296,7 +296,7 @@ int getTheMainOp(int p, int q)
   return op;
 }
 
-u_int32_t eval(int p, int q)
+u_int64_t eval(int p, int q)
 {
   if (p > q)
     return 0;
@@ -305,9 +305,9 @@ u_int32_t eval(int p, int q)
     if (tokens[p].str[0] == '\0')
       return 0;
     if (tokens[p].type == 'd')
-      return strtoul(tokens[p].str, NULL, 10);
+      return strtoull(tokens[p].str, NULL, 10);
     if (tokens[p].type == 'h')
-      return strtoul(tokens[p].str, NULL, 16);
+      return strtoull(tokens[p].str, NULL, 16);
     if (tokens[p].type == 'r')
     {
       bool find = false;
@@ -376,7 +376,7 @@ word_t expr(char *e, bool *success)
       tokens[i].type = DEREF;
   }
   error = 0;
-  u_int32_t val = eval(0, nr_token - 1);
+  u_int64_t val = eval(0, nr_token - 1);
   if (error == 1)
   {
     *success = false;

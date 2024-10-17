@@ -156,9 +156,9 @@ static int cmd_p(char *args)
   else
   {
     bool sign = true;
-    uint32_t ans = expr(args, &sign);
+    uint64_t ans = expr(args, &sign);
     if (sign)
-      printf("%u\n", ans);
+      printf("%lu\n", ans);
     else
       printf("The expr(%s) is not correct expression", args);
   }
@@ -175,10 +175,10 @@ static int cmd_test(char *args)
     char *ref_result = strtok(buf, " ");
     char *ref_expr = strtok(NULL, "\n");
     bool *success = NULL;
-    uint32_t res = expr(ref_expr, success);
+    uint64_t res = expr(ref_expr, success);
     if (success == NULL)
     {
-      sprintf(myRes, "%u", res);
+      sprintf(myRes, "%lu", res);
       if (strcmp(ref_result, myRes) == 0)
       {
         printf("%s=%s success\n", ref_expr, ref_result);
