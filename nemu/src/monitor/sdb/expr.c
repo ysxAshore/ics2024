@@ -310,9 +310,9 @@ u_int32_t eval(int p, int q)
       return strtoul(tokens[p].str, NULL, 16);
     if (tokens[p].type == 'r')
     {
-      bool *success = NULL;
-      word_t value = isa_reg_str2val(tokens[p].str, success);
-      if (*success == true)
+      bool *find = NULL;
+      word_t value = isa_reg_str2val(tokens[p].str, find);
+      if (find)
         return value;
       else
       {
