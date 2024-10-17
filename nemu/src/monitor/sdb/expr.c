@@ -304,8 +304,10 @@ u_int32_t eval(int p, int q)
   {
     if (tokens[p].str[0] == '\0')
       return 0;
-    if (tokens[p].type == 'd' || tokens[p].type == 'h')
+    if (tokens[p].type == 'd')
       return strtoul(tokens[p].str, NULL, 10);
+    if (tokens[p].type == 'h')
+      return strtoul(tokens[p].str, NULL, 16);
     if (tokens[p].type == 'r')
     {
       bool *success = NULL;
