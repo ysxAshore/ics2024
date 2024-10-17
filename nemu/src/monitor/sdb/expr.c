@@ -52,7 +52,7 @@ static struct rule
     {"\\)", ')'},                   // right )
     {"[0-9]+", 'd'},                // digit
     {"$..", 'r'},                   // regName
-    {"0[xX][0-9A-Fa-F]{1,8}", 'h'}, // hexNum
+    {"0[xX][0-9a-fA-F]{1,8}", 'h'}, // hexNum
     {"==", TK_EQ},                  // equal
     {"!=", TK_NEQ},                 // not_equal
     {"&&", TK_AND},                 // and
