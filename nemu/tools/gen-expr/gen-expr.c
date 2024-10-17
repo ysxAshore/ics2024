@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
     gen_rand_expr();
 
     position = getFirstNullPos();
-    if (position > 1000) // 表达式不超过1000字符
+    if (position > 100) // 表达式不超过300字符
     {
       --i;
       continue;
