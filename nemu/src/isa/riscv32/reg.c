@@ -24,7 +24,7 @@ const char *regs[] = {
 
 void isa_reg_display()
 {
-  for (int i = 0; i < 31; i = i + 4)
+  for (int i = 0; i < 29; i = i + 4)
   {
     printf("%s:%#lX\t%s:%#lX\t%s:%#lX\t%s:%#lX\n", regs[i], cpu.gpr[i], regs[i + 1], cpu.gpr[i + 1], regs[i + 2], cpu.gpr[i + 2], regs[i + 3], cpu.gpr[i + 3]);
   }
@@ -32,5 +32,23 @@ void isa_reg_display()
 
 word_t isa_reg_str2val(const char *s, bool *success)
 {
-  return 0;
+  int find = 0, i = 0;
+  for (; i < 32; i++)
+  {
+    if (strcmp(regs[i], s) == 0)
+    {
+      find = 1;
+      break;
+    }
+  }
+  if (find)
+  {
+    *success = true;
+    return cpu.gpr[i];
+  }
+  else
+  {
+    *success = false;
+    return 0;
+  }
 }

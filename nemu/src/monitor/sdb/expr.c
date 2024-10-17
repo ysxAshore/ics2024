@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <memory/vaddr.h>
+#include <isa.h>
 
 enum
 {
@@ -302,7 +303,20 @@ u_int32_t eval(int p, int q)
   {
     if (tokens[p].str[0] == '\0')
       return 0;
-    return strtoul(tokens[p].str, NULL, 10);
+    if (tokens[p].type == 'd' || tokens[p].type == 'h')
+      return strtoul(tokens[p].str, NULL, 10);
+    if (tokens[p].type == 'r')
+    {
+      bool *success = NULL;
+      word_t value = isa_reg_str2val(tokens[p].str, success);
+      if (*success == true)
+        return value;
+      else
+      {
+        error = 1;
+        return 0;
+      }
+    }
   }
   else if (tokens[p].type == '(' && tokens[q].type == ')' && check_parentheses(p, q))
     return eval(p + 1, q - 1);
