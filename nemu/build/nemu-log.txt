@@ -1,0 +1,33 @@
+[1;34m[src/utils/log.c:30 init_log] Log is written to /home/ysxashore/Projects/ics2024/nemu/build/nemu-log.txt[0m
+[1;34m[src/memory/paddr.c:50 init_mem] physical memory area [0x80000000, 0x87ffffff][0m
+[1;34m[src/monitor/monitor.c:49 load_img] No image is given. Use the default build-in image.[0m
+[1;34m[src/monitor/monitor.c:28 welcome] Trace: [1;32mON[0m[0m
+[1;34m[src/monitor/monitor.c:29 welcome] If trace is enabled, a log file will be generated to record the trace. This may lead to a large log file. If it is not necessary, you can disable it in menuconfig[0m
+[1;34m[src/monitor/monitor.c:32 welcome] Build time: 20:16:18, Oct 17 2024[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[7] = "[0-9]+" at position 0 with len 1: 5[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[0] = " +" at position 1 with len 1:  [0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[12] = "&&" at position 2 with len 2: &&[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[0] = " +" at position 4 with len 1:  [0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[7] = "[0-9]+" at position 5 with len 1: 1[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[7] = "[0-9]+" at position 0 with len 1: 5[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[0] = " +" at position 1 with len 1:  [0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[12] = "&&" at position 2 with len 2: &&[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[0] = " +" at position 4 with len 1:  [0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[7] = "[0-9]+" at position 5 with len 1: 0[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[7] = "[0-9]+" at position 0 with len 1: 5[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[0] = " +" at position 1 with len 1:  [0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[10] = "==" at position 2 with len 2: ==[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[0] = " +" at position 4 with len 1:  [0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[7] = "[0-9]+" at position 5 with len 1: 5[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[2] = "\-" at position 0 with len 1: -[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[2] = "\-" at position 1 with len 1: -[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[7] = "[0-9]+" at position 2 with len 1: 5[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[2] = "\-" at position 0 with len 1: -[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[1] = "\+" at position 1 with len 1: +[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[7] = "[0-9]+" at position 2 with len 1: 5[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[2] = "\-" at position 0 with len 1: -[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[4] = "/" at position 1 with len 1: /[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[7] = "[0-9]+" at position 2 with len 1: 5[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[2] = "\-" at position 0 with len 1: -[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[3] = "\*" at position 1 with len 1: *[0m
+[1;34m[src/monitor/sdb/expr.c:112 make_token] match rules[7] = "[0-9]+" at position 2 with len 1: 5[0m
