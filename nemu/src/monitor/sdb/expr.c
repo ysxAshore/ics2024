@@ -21,14 +21,16 @@
 #include <regex.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 enum
 {
   TK_NOTYPE = 256,
   TK_EQ,
-
+  TK_NEQ,
+  TK_AND,
+  DEREF
   /* TODO: Add more token types */
-
 };
 
 static struct rule
@@ -41,15 +43,19 @@ static struct rule
      * Pay attention to the precedence level of different rules.
      */
 
-    {" +", TK_NOTYPE}, // spaces one or more
-    {"\\+", '+'},      // plus
-    {"\\-", '-'},      // sub
-    {"\\*", '*'},      // mul
-    {"/", '/'},        // div
-    {"\\(", '('},      // left (
-    {"\\)", ')'},      // right )
-    {"[0-9]+", 'd'},   // digit
-    {"==", TK_EQ},     // equal
+    {" +", TK_NOTYPE},               // spaces one or more
+    {"\\+", '+'},                    // plus
+    {"\\-", '-'},                    // sub
+    {"\\*", '*'},                    // mul
+    {"/", '/'},                      // div
+    {"\\(", '('},                    // left (
+    {"\\)", ')'},                    // right )
+    {"[0-9]+", 'd'},                 // digit
+    {"$..", 'r'},                    // regName
+    {"0[x|X][0-9A-Fa-F]{1,8}", 'h'}, // hexNum
+    {"==", TK_EQ},                   // equal
+    {"!=", TK_NEQ},                  // not_equal
+    {"&&", TK_AND},                  // and
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -149,6 +155,17 @@ static bool make_token(char *e)
             ++nr_token;
           }
           break;
+        case 'r':
+          tokens[nr_token].type = 'r';
+          strncpy(tokens[nr_token].str, substr_start, substr_len);
+          tokens[nr_token].str[substr_len] = '\0'; // 手动添加空字符
+          ++nr_token;
+          break;
+        case 'h':
+          tokens[nr_token].type = 'h';
+          strncpy(tokens[nr_token].str, substr_start, substr_len);
+          tokens[nr_token].str[substr_len] = '\0'; // 手动添加空字符
+          ++nr_token;
         case '(':
           tokens[nr_token].type = '(';
           tokens[nr_token].str[0] = '\0';
@@ -161,6 +178,16 @@ static bool make_token(char *e)
           break;
         case TK_EQ:
           tokens[nr_token].type = TK_EQ;
+          tokens[nr_token].str[0] = '\0';
+          ++nr_token;
+          break;
+        case TK_NEQ:
+          tokens[nr_token].type = TK_NEQ;
+          tokens[nr_token].str[0] = '\0';
+          ++nr_token;
+          break;
+        case TK_AND:
+          tokens[nr_token].type = TK_AND;
           tokens[nr_token].str[0] = '\0';
           ++nr_token;
           break;
@@ -208,7 +235,7 @@ int getTheMainOp(int p, int q)
   int op = p;
   for (int i = p; i <= q; i++)
   {
-    if (tokens[i].type == 'd')
+    if (tokens[i].type == 'd' || tokens[i].type == 'r' || tokens[i].type == 'h')
       continue;
     if (tokens[i].type == '(')
     { // 匹配到相对应的右括号
@@ -232,22 +259,35 @@ int getTheMainOp(int p, int q)
     }
     else
     {
+      // 优先级比当前运算符低的才换
       if (tokens[op].type == '+' || tokens[op].type == '-')
-      { // 只有ｉ表示+/-才替换
-        if (tokens[i].type == '+' || tokens[i].type == '-')
+      { // 只有ｉ表示+/-/==/!=/&&才替换
+        if (tokens[i].type == '+' || tokens[i].type == '-' || tokens[i].type == TK_EQ || tokens[i].type == TK_NEQ || tokens[i].type == TK_AND)
           op = i;
       }
-      else if (tokens[op].type == '_') // _+2 _5+_2
+      else if (tokens[op].type == TK_EQ || tokens[op].type == TK_NEQ)
       {
-        if (i == op + 1 && (tokens[i].type == '+' || tokens[i].type == '-'))
-          ;
-        else
-        {
+        if (tokens[i].type == TK_EQ || tokens[i].type == TK_NEQ || tokens[i].type == TK_AND)
           op = i;
-        }
+      }
+      else if (tokens[op].type == TK_AND)
+      {
       }
       else
         op = i;
+      // else if (tokens[op].type == '_')
+      // {
+      //   if (tokens[op].type == '_' || tokens[op].type == DEREF)
+      //   {
+      //     /* code */
+      //   }
+      // }
+      // else if (tokens[op].type == DEREF) // *+5  *-5 *x5
+      // {
+      //   if (i == op + 1 && (tokens[i].type == '+' || tokens[i].type == '-' || tokens))
+      // }
+      // else
+      //   op = i;
     }
   }
   return op;
@@ -282,6 +322,15 @@ u_int32_t eval(int p, int q)
       return val1 / val2;
     case '_':
       return -1 * val2;
+    case TK_EQ:
+      return val1 == val2;
+    case TK_NEQ:
+      return val1 != val2;
+    case TK_AND:
+      return val1 && val2;
+    case DEREF:
+      u_int32_t *p = (u_int32_t *)(uintptr_t)val2;
+      return *p;
     default:
       error = 1;
     }
@@ -302,8 +351,12 @@ word_t expr(char *e, bool *success)
   {
     if (tokens[i].type == '-' &&
         (i == 0 ||
-         (i > 0 && tokens[i - 1].type != ')' && tokens[i - 1].type != 'd' && tokens[i - 1].type != '_')))
+         (i > 0 && tokens[i - 1].type != ')' && tokens[i - 1].type != 'd')))
       tokens[i].type = '_';
+    if (tokens[i].type == '*' &&
+        (i == 0 ||
+         (i > 0 && tokens[i - 1].type != 'd' && tokens[i - 1].type != ')')))
+      tokens[i].type = DEREF;
   }
   error = 0;
   u_int32_t val = eval(0, nr_token - 1);
