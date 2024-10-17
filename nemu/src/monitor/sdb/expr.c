@@ -273,6 +273,20 @@ int getTheMainOp(int p, int q)
       else if (tokens[op].type == TK_AND)
       {
       }
+      else if (tokens[op].type == '_') // - * 5 - AND 5
+      {
+        if (i == op + 1)
+          ;
+        else
+          op = i;
+      }
+      else if (tokens[op].type == DEREF)
+      {
+        if (i == op + 1 && (tokens[i].type == '+' || tokens[i].type == '-' || tokens[i].type == '_' || tokens[i].type == DEREF))
+          ;
+        else
+          op = i;
+      }
       else
         op = i;
       // else if (tokens[op].type == '_')
