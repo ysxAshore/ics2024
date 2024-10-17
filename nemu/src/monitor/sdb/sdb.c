@@ -181,11 +181,11 @@ static int cmd_test(char *args)
       sprintf(myRes, "%u", res);
       if (strcmp(ref_result, myRes) == 0)
       {
-        printf("%s=%s success", ref_expr, ref_result);
+        printf("%s=%s success\n", ref_expr, ref_result);
         continue;
       }
     }
-    printf("%s=%s falied", ref_expr, ref_result);
+    printf("%s=%s falied\n", ref_expr, ref_result);
   }
   return 0;
 }
