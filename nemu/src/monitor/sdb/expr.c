@@ -268,6 +268,11 @@ int getTheMainOp(int p, int q)
         if (tokens[i].type == '+' || tokens[i].type == '-' || tokens[i].type == TK_EQ || tokens[i].type == TK_NEQ || tokens[i].type == TK_AND)
           op = i;
       }
+      else if (tokens[op].type == '*' || tokens[op].type == '/')
+      {
+        if (tokens[i].type == '*' || tokens[i].type == '/' || tokens[i].type == '+' || tokens[i].type == '-' || tokens[i].type == TK_EQ || tokens[i].type == TK_NEQ || tokens[i].type == TK_AND)
+          op = i;
+      }
       else if (tokens[op].type == TK_EQ || tokens[op].type == TK_NEQ)
       {
         if (tokens[i].type == TK_EQ || tokens[i].type == TK_NEQ || tokens[i].type == TK_AND)
