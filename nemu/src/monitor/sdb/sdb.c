@@ -175,10 +175,10 @@ static int cmd_test(char *args)
     char *ref_result = strtok(buf, " ");
     char *ref_expr = strtok(NULL, "\n");
     bool *success = NULL;
-    uint64_t res = expr(ref_expr, success);
+    uint32_t res = expr(ref_expr, success);
     if (success == NULL)
     {
-      sprintf(myRes, "%lu", res);
+      sprintf(myRes, "%u", res);
       if (strcmp(ref_result, myRes) == 0)
       {
         printf("%s=%s success\n", ref_expr, ref_result);
