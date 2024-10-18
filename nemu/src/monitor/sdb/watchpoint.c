@@ -109,7 +109,7 @@ void createAWatch(char *args)
     printf("The %d watch has created,%s = %lu\n", awp->NO, awp->expression, awp->val);
   }
   else
-    printf("The expression %s isn't solvable", args);
+    printf("The expression %s isn't solvable\n", args);
 }
 void checkWatchesStatus()
 {
