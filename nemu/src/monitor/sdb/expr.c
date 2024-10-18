@@ -222,6 +222,7 @@ bool check_parentheses(int p, int q)
       error = 1;
       return false;
     }
+    // 需要排除()op()这种情况
     if (i == 0 && j != q)
     {
       return false;
