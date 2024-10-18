@@ -64,8 +64,8 @@ void gen_num()
 {
   position = getFirstNullPos();
 
-  uint32_t n = choose(1000);
-  sprintf(buf + position, "%d", n);
+  uint64_t n = choose(1000);
+  sprintf(buf + position, "%lu", n);
 }
 void gen_rand_op()
 {
