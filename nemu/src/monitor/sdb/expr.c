@@ -332,8 +332,9 @@ u_int64_t eval(int p, int q)
   else
   {
     int op = getTheMainOp(p, q);
-    u_int64_t val1 = eval(p, op - 1);
-    u_int64_t val2 = eval(op + 1, q);
+
+    int val1 = eval(p, op - 1);
+    int val2 = eval(op + 1, q);
     switch (tokens[op].type)
     {
     case '+':

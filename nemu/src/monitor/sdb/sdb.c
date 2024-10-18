@@ -107,16 +107,11 @@ static int cmd_info(char *args)
     if (tmp == NULL)
     {
       if (strcmp(arg, "r") == 0)
-      {
         isa_reg_display();
-      }
       else if (strcmp(arg, "w") == 0)
-      {
-      }
+        displayAllWatch();
       else
-      {
-        printf("now the info only is supported to display the status of registers and watches");
-      }
+        printf("now the info only is supported to display the status of registers and watches\n");
     }
     else
     {
@@ -165,6 +160,33 @@ static int cmd_p(char *args)
   return 0;
 }
 
+static int cmd_w(char *args)
+{
+  createAWatch(args);
+  return 0;
+}
+
+static int cmd_d(char *args)
+{
+  int N;
+  if (args != NULL)
+  {
+    if (strspn(args, "0123456789") == strlen(args))
+    {
+      N = atoi(args);
+      if (N >= 0 && N < NR_WP)
+        deleteOneWatch(N);
+      else
+        printf("The d command needs a digit as its arguments,from 0 to %d\n", NR_WP - 1);
+    }
+    else
+      printf("Unknown command 'd %s\n'", args);
+  }
+  else
+    printf("The d command needs a digit as its arguments,from 0 to %d\n", NR_WP - 1);
+  return 0;
+}
+
 static int cmd_test(char *args)
 {
   FILE *fp = fopen("tools/gen-expr/output.txt", "r");
@@ -204,6 +226,8 @@ static struct
     {"info", "'info r/w' print the information of registers or watches", cmd_info},
     {"x", "'x N address' print the N memory from address beginning", cmd_x},
     {"p", "'p expr' print the answer of expr", cmd_p},
+    {"w", "'w expr' record the expression as a watch", cmd_w},
+    {"d", "'d N' is delete the watch of No.N", cmd_d},
     {"test", "test the function of expr", cmd_test},
 
 };
