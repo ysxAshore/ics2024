@@ -34,6 +34,7 @@ void init_wp_pool()
   for (i = 0; i < NR_WP; i++)
   {
     wp_pool[i].NO = i;
+    wp_pool[i].expression = NULL;
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
   }
 
@@ -108,9 +109,7 @@ void createAWatch(char *args)
     printf("The %d watch has created,%s = %lu\n", awp->NO, awp->expression, awp->val);
   }
   else
-  {
     printf("The expression %s isn't solvable", args);
-  }
 }
 void checkWatchesStatus()
 {
