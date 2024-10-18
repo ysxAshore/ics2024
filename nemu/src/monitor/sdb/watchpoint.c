@@ -69,6 +69,10 @@ void displayAllWatch()
     printf("The expression of the %d watch is %s,and the current value is %lu\n", p->NO, p->expression, p->val);
     p = p->next;
   }
+  if (p == NULL)
+  {
+    printf("There is no watch\n");
+  }
 }
 void deleteOneWatch(int N)
 {
@@ -87,6 +91,7 @@ void deleteOneWatch(int N)
     head = tmp->next;
   else
     q->next = tmp->next;
+  printf("The %d watch has deleted\n", N);
   free_wp(tmp);
 }
 void createAWatch(char *args)
@@ -96,7 +101,7 @@ void createAWatch(char *args)
   uint64_t val = expr(args, &sign);
   if (sign)
   {
-    awp->expression = args;
+    strcpy(awp->expression, args); // 不能直接赋值，因为直接赋值只能保证第一次是对的，其他时变量被回收值不确定
     awp->val = val;
     awp->next = head;
     head = awp;
@@ -105,5 +110,24 @@ void createAWatch(char *args)
   else
   {
     printf("The expression %s isn't solvable", args);
+  }
+}
+void checkWatchesStatus()
+{
+  WP *p = head;
+  while (p != NULL)
+  {
+    bool sign = true;
+    uint64_t nowVal = expr(p->expression, &sign);
+    if (nowVal != p->val && sign)
+    {
+      printf("The %d watch watches the expression %s has changed,from %lu to %lu\n", p->NO, p->expression, p->val, nowVal);
+      p->val = nowVal;
+      nemu_state.state = NEMU_STOP;
+    }
+    else
+      printf("The expression %s isn't solvable", p->expression);
+
+    p = p->next;
   }
 }

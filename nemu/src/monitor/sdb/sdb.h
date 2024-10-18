@@ -24,4 +24,5 @@ word_t expr(char *e, bool *success);
 void displayAllWatch();
 void deleteOneWatch(int N);
 void createAWatch(char *args);
+void checkWatchesStatus();
 #endif
