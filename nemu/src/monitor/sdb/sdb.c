@@ -169,13 +169,13 @@ static int cmd_test(char *args)
 {
   FILE *fp = fopen("tools/gen-expr/output.txt", "r");
   assert(fp != NULL);
-  char buf[1007], myRes[11];
+  char buf[107], myRes[11];
   while (fgets(buf, sizeof(buf), fp) != NULL)
   {
     char *ref_result = strtok(buf, " ");
     char *ref_expr = strtok(NULL, "\n");
     bool *success = NULL;
-    uint32_t res = expr(ref_expr, success);
+    uint32_t res = expr(ref_expr, success); // 这里不改64,因为output中是32
     if (success == NULL)
     {
       sprintf(myRes, "%u", res);
