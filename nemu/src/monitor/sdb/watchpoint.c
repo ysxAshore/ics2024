@@ -118,14 +118,14 @@ void checkWatchesStatus()
   {
     bool sign = true;
     uint64_t nowVal = expr(p->expression, &sign);
-    if (nowVal != p->val && sign)
+    if (sign && nowVal != p->val)
     {
       printf("The %d watch watches the expression %s has changed,from %lu to %lu\n", p->NO, p->expression, p->val, nowVal);
       p->val = nowVal;
       nemu_state.state = NEMU_STOP;
     }
-    else
-      printf("The expression %s isn't solvable", p->expression);
+    else if (!sign)
+      printf("The expression %s isn't solvable\n", p->expression);
 
     p = p->next;
   }
