@@ -65,16 +65,18 @@ void free_wp(WP *wp)
 void displayAllWatch()
 {
   WP *p = head;
+  if (p == NULL)
+  {
+    printf("There is no watch\n");
+  }
+
   while (p != NULL)
   {
     printf("The expression of the %d watch is %s,and the current value is %lu\n", p->NO, p->expression, p->val);
     p = p->next;
   }
-  if (p == NULL)
-  {
-    printf("There is no watch\n");
-  }
 }
+
 void deleteOneWatch(int N)
 {
   WP *p = head, *q = head, *tmp = NULL;
@@ -92,9 +94,16 @@ void deleteOneWatch(int N)
     head = tmp->next;
   else
     q->next = tmp->next;
-  printf("The %d watch has deleted\n", N);
-  free_wp(tmp);
+
+  if (tmp != NULL)
+  {
+    printf("The %d watch has deleted\n", N);
+    free_wp(tmp);
+  }
+  else
+    printf("The %d not match a watchpoint\n", N);
 }
+
 void createAWatch(char *args)
 {
   WP *awp = new_wp();

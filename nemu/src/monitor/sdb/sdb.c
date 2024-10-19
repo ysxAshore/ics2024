@@ -162,7 +162,10 @@ static int cmd_p(char *args)
 
 static int cmd_w(char *args)
 {
-  createAWatch(args);
+  if (args == NULL)
+    printf("The w command needs a argument as expression to watch\n");
+  else
+    createAWatch(args);
   return 0;
 }
 
@@ -180,7 +183,7 @@ static int cmd_d(char *args)
         printf("The d command needs a digit as its arguments,from 0 to %d\n", NR_WP - 1);
     }
     else
-      printf("Unknown command 'd %s\n'", args);
+      printf("The d command needs a digit as its arguments,from 0 to %d\n", NR_WP - 1);
   }
   else
     printf("The d command needs a digit as its arguments,from 0 to %d\n", NR_WP - 1);
