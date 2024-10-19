@@ -194,7 +194,7 @@ static int cmd_test(char *args)
 {
   FILE *fp = fopen("tools/gen-expr/output.txt", "r");
   assert(fp != NULL);
-  char buf[107], myRes[11];
+  char buf[200], myRes[11];
   while (fgets(buf, sizeof(buf), fp) != NULL)
   {
     char *ref_result = strtok(buf, " ");
