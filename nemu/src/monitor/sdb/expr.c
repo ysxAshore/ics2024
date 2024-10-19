@@ -53,7 +53,7 @@ static struct rule
     {"\\)", ')'},                   // right )
     {"0[xX][0-9a-fA-F]{1,8}", 'h'}, // hexNum
     {"[0-9]+", 'd'},                // digit
-    {"\\$[0-9a-f]{1,3}", 'r'},      // regName
+    {"\\$[0-9a-fA-F]{1,3}", 'r'},   // regName
     {"==", TK_EQ},                  // equal
     {"!=", TK_NEQ},                 // not_equal
     {"&&", TK_AND},                 // and
@@ -196,7 +196,7 @@ static bool make_token(char *e)
         default:
         }
       }
-      if (i == NR_REGEX)
+      if (i == NR_REGEX - 1)
       {
         printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
         return false;
