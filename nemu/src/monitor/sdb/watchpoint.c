@@ -90,13 +90,13 @@ void deleteOneWatch(int N)
     q = p;
     p = p->next;
   }
-  if (p == head && p != NULL)
-    head = tmp->next;
-  else
-    q->next = tmp->next;
 
-  if (tmp != NULL)
+  if (tmp != NULL) // 之前已经赋值过
   {
+    if (p == head)
+      head = tmp->next;
+    else
+      q->next = tmp->next;
     printf("The %d watch has deleted\n", N);
     free_wp(tmp);
   }
