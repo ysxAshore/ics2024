@@ -155,7 +155,7 @@ static int cmd_p(char *args)
     if (sign)
       printf("%lu\n", ans);
     else
-      printf("The expr(%s) is not correct expression", args);
+      printf("The expr(%s) is not correct expression\n", args);
   }
   return 0;
 }
