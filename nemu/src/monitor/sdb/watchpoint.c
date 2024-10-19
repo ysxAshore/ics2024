@@ -129,7 +129,10 @@ void checkWatchesStatus()
     uint64_t nowVal = expr(p->expression, &sign);
     if (sign && nowVal != p->val)
     {
-      printf("The %d watch watches the expression %s has changed,from %lu to %lu\n", p->NO, p->expression, p->val, nowVal);
+      if (strcmp(p->expression, "$pc") == 0)
+        printf("The %d watch watches the expression %s has changed,from %lX to %lX\n", p->NO, p->expression, p->val, nowVal);
+      else
+        printf("The %d watch watches the expression %s has changed,from %lu to %lu\n", p->NO, p->expression, p->val, nowVal);
       p->val = nowVal;
       nemu_state.state = NEMU_STOP;
     }
