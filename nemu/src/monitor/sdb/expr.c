@@ -196,6 +196,7 @@ static bool make_token(char *e)
         default:
           break;
         }
+        break;
       }
     }
     if (i == NR_REGEX)
