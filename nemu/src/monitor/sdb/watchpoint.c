@@ -115,10 +115,7 @@ void createAWatch(char *args)
     awp->val = val;
     awp->next = head;
     head = awp;
-    if (strcpy(awp->expression, "$pc"))
-      printf("The %d watch has created,%s = %lx\n", awp->NO, awp->expression, awp->val);
-    else
-      printf("The %d watch has created,%s = %lu\n", awp->NO, awp->expression, awp->val);
+    printf("The %d watch has created,%s = %lx\n", awp->NO, awp->expression, awp->val);
   }
   else
     printf("The expression %s isn't solvable\n", args);
@@ -132,10 +129,8 @@ void checkWatchesStatus()
     uint64_t nowVal = expr(p->expression, &sign);
     if (sign && nowVal != p->val)
     {
-      if (strcmp(p->expression, "$pc") == 0)
-        printf("The %d watch watches the expression %s has changed,from %lx to %lx\n", p->NO, p->expression, p->val, nowVal);
-      else
-        printf("The %d watch watches the expression %s has changed,from %lu to %lu\n", p->NO, p->expression, p->val, nowVal);
+
+      printf("The %d watch watches the expression %s has changed,from %lx to %lx\n", p->NO, p->expression, p->val, nowVal);
       p->val = nowVal;
       nemu_state.state = NEMU_STOP;
     }
