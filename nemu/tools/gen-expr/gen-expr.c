@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr"); // 执行错误的不写入
+    int ret = system("gcc /tmp/.code.c -o /tmp/.expr"); // 编译错误的不写入
     if (ret != 0)
     {
       --i;
