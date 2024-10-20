@@ -61,3 +61,6 @@ else
 # Include rules to build NEMU
 include $(NEMU_HOME)/scripts/native.mk
 endif
+
+count : 
+	find ./* -name "*.[ch]" | xargs cat | grep -v '^\s*$$' | wc -l
