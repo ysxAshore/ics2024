@@ -155,7 +155,10 @@ static int cmd_p(char *args)
     bool sign = true;
     word_t ans = expr(args, &sign);
     if (sign)
+    {
       printf(FMT_WORD, ans);
+      printf("\n");
+    }
     else
       printf("The expr(%s) is not correct expression\n", args);
   }
