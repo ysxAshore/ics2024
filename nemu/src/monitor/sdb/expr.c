@@ -304,7 +304,7 @@ int getTheMainOp(int p, int q)
   return op;
 }
 
-u_int64_t eval(int p, int q)
+word_t eval(int p, int q)
 {
   if (p > q)
     return 0;
@@ -335,8 +335,8 @@ u_int64_t eval(int p, int q)
   {
     int op = getTheMainOp(p, q);
 
-    int val1 = eval(p, op - 1);
-    int val2 = eval(op + 1, q);
+    sword_t val1 = eval(p, op - 1);
+    sword_t val2 = eval(op + 1, q);
     switch (tokens[op].type)
     {
     case '+':
@@ -356,7 +356,7 @@ u_int64_t eval(int p, int q)
     case TK_AND:
       return val1 && val2;
     case DEREF:
-      return vaddr_read(val2, sizeof(uint32_t));
+      return vaddr_read(val2, sizeof(word_t));
     default:
       error = 1;
     }
@@ -385,7 +385,7 @@ word_t expr(char *e, bool *success)
       tokens[i].type = DEREF;
   }
   error = 0;
-  u_int64_t val = eval(0, nr_token - 1);
+  word_t val = eval(0, nr_token - 1);
   if (error == 1)
   {
     *success = false;

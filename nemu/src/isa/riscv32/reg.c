@@ -26,7 +26,18 @@ void isa_reg_display()
 {
   for (int i = 0; i < 29; i = i + 4)
   {
-    printf("%s:%#lX\t%s:%#lX\t%s:%#lX\t%s:%#lX\n", regs[i], cpu.gpr[i], regs[i + 1], cpu.gpr[i + 1], regs[i + 2], cpu.gpr[i + 2], regs[i + 3], cpu.gpr[i + 3]);
+    printf("%s:", regs[i]);
+    printf(FMT_WORD, cpu.gpr[i]);
+    printf("\t");
+    printf("%s:", regs[i + 1]);
+    printf(FMT_WORD, cpu.gpr[i + 1]);
+    printf("\t");
+    printf("%s:", regs[i + 2]);
+    printf(FMT_WORD, cpu.gpr[i + 2]);
+    printf("\t");
+    printf("%s:", regs[i + 3]);
+    printf(FMT_WORD, cpu.gpr[i + 3]);
+    printf("\n");
   }
 }
 

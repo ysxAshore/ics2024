@@ -22,7 +22,7 @@ typedef struct watchpoint
 
   /* TODO: Add more members if necessary */
   char *expression;
-  uint64_t val;
+  word_t val;
 } WP;
 
 static WP wp_pool[NR_WP] = {};
@@ -72,7 +72,9 @@ void displayAllWatch()
 
   while (p != NULL)
   {
-    printf("The expression of the %d watch is %s,and the current value is %lu\n", p->NO, p->expression, p->val);
+    printf("The expression of the %d watch is %s,and the current value is ", p->NO, p->expression);
+    printf(FMT_WORD, p->val);
+    printf("\n");
     p = p->next;
   }
 }
@@ -115,7 +117,9 @@ void createAWatch(char *args)
     awp->val = val;
     awp->next = head;
     head = awp;
-    printf("The %d watch has created,%s = %lx\n", awp->NO, awp->expression, awp->val);
+    printf("The %d watch has created,%s = ", awp->NO, awp->expression);
+    printf(FMT_WORD, awp->val);
+    printf("\n");
   }
   else
     printf("The expression %s isn't solvable\n", args);
@@ -130,7 +134,11 @@ void checkWatchesStatus()
     if (sign && nowVal != p->val)
     {
 
-      printf("The %d watch watches the expression %s has changed,from %lx to %lx\n", p->NO, p->expression, p->val, nowVal);
+      printf("The %d watch watches the expression %s has changed,from ", p->NO, p->expression);
+      printf(FMT_WORD, p->val);
+      printf(" to ");
+      printf(FMT_WORD, nowVal);
+      printf("\n");
       p->val = nowVal;
       nemu_state.state = NEMU_STOP;
     }

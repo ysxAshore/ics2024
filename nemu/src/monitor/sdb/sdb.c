@@ -137,8 +137,10 @@ static int cmd_x(char *args)
     begin = (paddr_t)strtoul(address, NULL, 16);
     for (int i = 0; i < N; ++i)
     {
-      printf("%#x: %#lX\n", begin, vaddr_read(begin, 4));
-      begin = begin + 4;
+      printf("%#x: ", begin);
+      printf(FMT_WORD, vaddr_read(begin, sizeof(word_t)));
+      printf("\n");
+      begin = begin + sizeof(word_t);
     }
   }
   return 0;
@@ -151,9 +153,9 @@ static int cmd_p(char *args)
   else
   {
     bool sign = true;
-    uint64_t ans = expr(args, &sign);
+    word_t ans = expr(args, &sign);
     if (sign)
-      printf("%lu\n", ans);
+      printf(FMT_WORD, ans);
     else
       printf("The expr(%s) is not correct expression\n", args);
   }
