@@ -381,7 +381,7 @@ word_t expr(char *e, bool *success)
       tokens[i].type = '_';
     if (tokens[i].type == '*' &&
         (i == 0 ||
-         (i > 0 && tokens[i - 1].type != 'd' && tokens[i - 1].type != ')')))
+         (i > 0 && tokens[i - 1].type != 'd' && tokens[i - 1].type != 'r' && tokens[i - 1].type != 'h' && tokens[i - 1].type != ')')))
       tokens[i].type = DEREF;
   }
   error = 0;
