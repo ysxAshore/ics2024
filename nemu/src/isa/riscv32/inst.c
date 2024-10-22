@@ -150,7 +150,7 @@ enum
            (SEXT(BITS(i, 7, 7), 1) << 11) |   \
            (SEXT(BITS(i, 30, 25), 6) << 5) |  \
            (SEXT(BITS(i, 11, 8), 4) << 1);    \
-    *imm = *imm << 1;                         \
+    printf("%lx\n", *imm);                    \
   } while (0);
 
 static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_t *imm, int type)
