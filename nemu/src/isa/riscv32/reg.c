@@ -24,6 +24,10 @@ const char *regs[] = {
 
 void isa_reg_display()
 {
+  // output regs and pc
+  printf("this pc is ");
+  printf(FMT_WORD, cpu.pc);
+  printf("\n");
   for (int i = 0; i < 29; i = i + 4)
   {
     printf("%s:", regs[i]);
