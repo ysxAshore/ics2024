@@ -121,6 +121,8 @@ void *memcpy(void *out, const void *in, size_t n)
   uintptr_t in_start = (uintptr_t)in;
   uintptr_t in_end = in_start + n;
   assert((out_start < in_end) && (in_start < out_end));
+
+  // 不重叠才能用memcpy
   char *tmp1 = (char *)out;
   char *tmp2 = (char *)in;
   strncpy(tmp1, tmp2, n);
