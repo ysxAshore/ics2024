@@ -64,11 +64,12 @@ int sprintf(char *out, const char *fmt, ...)
         char *tmp_str = va_arg(arglist, char *);
         strcat(out, tmp_str);
       }
+      i = i + 1;
     }
     else
     {
       tmp_str[0] = fmt[i];
-      tmp_str[1] = 0;
+      tmp_str[1] = '\0';
       strcat(out, tmp_str);
     }
   }
