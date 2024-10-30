@@ -285,10 +285,10 @@ static int decode_exec(Decode *s)
   INSTPAT("0000000 ????? ????? 101 ????? 01110 11", srlw, R, R(rd) = SEXT(BITS(BITS(src1, 31, 0) >> BITS(src2, 4, 0), 31, 0), 32));
   INSTPAT("0100000 ????? ????? 101 ????? 01110 11", sraw, R, R(rd) = SEXT(BITS((int32_t)BITS(src1, 31, 0) >> BITS(src2, 4, 0), 31, 0), 32));
   INSTPAT("0000001 ????? ????? 000 ????? 01110 11", mulw, R, R(rd) = SEXT(BITS(BITS(src1, 31, 0) * BITS(src2, 31, 0), 31, 0), 32));
-  INSTPAT("0000001 ????? ????? 100 ????? 01110 11", divw, R, R(rd) = (int32_t)src2 == 0 ? UINT64_MAX : SEXT(BITS((int32_t)src1 / (int32_t)src2, 31, 0), 32));
-  INSTPAT("0000001 ????? ????? 101 ????? 01110 11", divuw, R, R(rd) = (uint32_t)src2 == 0 ? UINT64_MAX : SEXT(BITS((uint32_t)src1 / (uint32_t)src2, 31, 0), 32));
-  INSTPAT("0000001 ????? ????? 110 ????? 01110 11", remw, R, R(rd) = (int32_t)src2 == 0 ? SEXT((int32_t)src1, 32) : SEXT(BITS((int32_t)src1 % (int32_t)src2, 31, 0), 32));
-  INSTPAT("0000001 ????? ????? 111 ????? 01110 11", remuw, R, R(rd) = (uint32_t)src2 == 0 ? SEXT((uint32_t)src1, 32) : SEXT(BITS((uint32_t)src1 % (uint32_t)src2, 31, 0), 32));
+  INSTPAT("0000001 ????? ????? 100 ????? 01110 11", divw, R, R(rd) = (int32_t)BITS(src2, 31, 0) == 0 ? UINT64_MAX : ((int32_t)BITS(src1, 31, 0) == INT32_MIN && (int32_t)BITS(src2, 31, 0) == -1 ? SEXT((int32_t)BITS(src1, 31, 0), 32) : (int32_t)BITS(src1, 31, 0) / (int32_t)BITS(src2, 31, 0)));
+  INSTPAT("0000001 ????? ????? 101 ????? 01110 11", divuw, R, R(rd) = (uint32_t)BITS(src2, 31, 0) == 0 ? UINT64_MAX : SEXT(BITS((uint32_t)src1 / (uint32_t)src2, 31, 0), 32));
+  INSTPAT("0000001 ????? ????? 110 ????? 01110 11", remw, R, R(rd) = (int32_t)BITS(src2, 31, 0) == 0 ? SEXT((int32_t)BITS(src1, 31, 0), 32) : ((int32_t)BITS(src1, 31, 0) == INT32_MIN && (int32_t)BITS(src2, 31, 0) == -1 ? 0 : SEXT(BITS((int32_t)BITS(src1, 31, 0) % (int32_t)BITS(src2, 31, 0), 31, 0), 32)));
+  INSTPAT("0000001 ????? ????? 111 ????? 01110 11", remuw, R, R(rd) = (uint32_t)BITS(src2, 31, 0) == 0 ? SEXT((uint32_t)BITS(src1, 31, 0), 32) : SEXT(BITS((uint32_t)BITS(src1, 31, 0) % (uint32_t)BITS(src2, 31, 0), 31, 0), 32));
   INSTPAT("??????? ????? ????? 000 ????? 11000 11", beq, B, Bins(&s->dnpc, s->pc, src1, src2, imm, 0));
   INSTPAT("??????? ????? ????? 001 ????? 11000 11", bne, B, Bins(&s->dnpc, s->pc, src1, src2, imm, 1));
   INSTPAT("??????? ????? ????? 100 ????? 11000 11", blt, B, Bins(&s->dnpc, s->pc, src1, src2, imm, 2));
