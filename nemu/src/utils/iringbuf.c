@@ -37,10 +37,15 @@ void printNodes()
         else
         {
             if (nodes[i].state)
+            {
                 printf("    ");
+                printf("%s \n", nodes[i].p);
+            }
             else
-                printf("--> ");
-            printf("%s \n", nodes[i].p);
+            {
+                printf("\033[1;31;40m--> \033[0m");
+                printf("\033[1;31;40m%s\n\033[0m", nodes[i].p);
+            }
         }
     }
     printf("NULL\n");
