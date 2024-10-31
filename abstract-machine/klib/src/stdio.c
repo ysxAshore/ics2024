@@ -73,6 +73,7 @@ int sprintf(char *out, const char *fmt, ...)
       strcat(out, tmp_str);
     }
   }
+  va_end(arglist);
   return strlen(out);
 }
 

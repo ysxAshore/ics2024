@@ -81,6 +81,8 @@ static void exec_once(Decode *s, vaddr_t pc)
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
               MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst, ilen);
+  void insertAtTail(bool state, vaddr_t pc, char *p, uint32_t inst);
+  insertAtTail(nemu_state.state == NEMU_RUNNING, s->pc, p, s->isa.inst);
 #endif
 }
 
@@ -93,7 +95,15 @@ static void execute(uint64_t n)
     g_nr_guest_inst++;
     trace_and_difftest(&s, cpu.pc); // this cpu.pc is next pc,but s->pc is now pc
     if (nemu_state.state != NEMU_RUNNING)
+    { // error,the output of iringbuf is assigned here
+#ifdef CONFIG_ITRACE
+      void modifyTheTail(bool state);
+      void printList();
+      modifyTheTail(false);
+      printList();
+#endif
       break;
+    }
     IFDEF(CONFIG_DEVICE, device_update());
   }
 }
