@@ -43,4 +43,5 @@ void printNodes()
             printf("%s \n", nodes[i].p);
         }
     }
+    printf("NULL\n");
 }
