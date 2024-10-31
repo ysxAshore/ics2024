@@ -19,7 +19,7 @@ void init_monitor(int, char *[]);
 void am_init_monitor();
 void engine_start();
 int is_exit_status_bad();
-void initIList();
+void initNodes();
 
 int main(int argc, char *argv[])
 {
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef CONFIG_ITRACE
-  initIList();
+  initNodes();
 #endif
   /* Start engine. */
   engine_start();

@@ -4,73 +4,43 @@ typedef struct IringNode
 {
     bool state;
     char p[128];
-    struct IringNode *next;
 } INode;
-typedef struct IringList
+static INode nodes[MAX_INST_TO_PRINT];
+static int cur = 0, last = 0;
+void initNodes()
 {
-    int len;
-    INode *head;
-    INode *tail;
-} IList;
-static IList *list;
-
-void initIList() // initial list
-{
-    list = (IList *)malloc(sizeof(IList));
-    list->len = 0;
-    list->head = NULL;
-    list->tail = NULL;
-}
-
-// 创建新节点
-INode *createNode(bool state, char *p)
-{
-    INode *newNode = (INode *)malloc(sizeof(INode));
-    newNode->state = state;
-    strcpy(newNode->p, p);
-    newNode->next = NULL;
-    return newNode;
-}
-
-// 尾部插入
-void insertAtTail(bool state, char *p)
-{
-    INode *newNode = createNode(state, p);
-    // 如果链表为空，将新节点设置为头和尾
-    if (list->head == NULL)
+    for (int i = 0; i < MAX_INST_TO_PRINT; i++)
     {
-        list->head = newNode;
-        list->tail = newNode;
-        list->len++;
+        nodes[i].state = true;
+        strcpy(nodes[i].p, "\0");
     }
-    else
+}
+void insertNode(bool state, char *p)
+{
+    INode temp;
+    temp.state = state;
+    strcpy(temp.p, p);
+    nodes[cur] = temp;
+    last = cur;
+    cur = (cur + 1) % MAX_INST_TO_PRINT;
+}
+void modifyNodeState(bool state)
+{
+    nodes[last].state = state;
+}
+void printNodes()
+{
+    for (int i = 0; i < MAX_INST_TO_PRINT; i++)
     {
-        list->tail->next = newNode;
-        list->tail = newNode;
-        list->len++;
-        if (list->len > MAX_INST_TO_PRINT)
+        if (nodes[i].p[0] == '\0')
+            continue;
+        else
         {
-            INode *tmp = list->head;
-            list->head = list->head->next;
-            free(tmp);
+            if (nodes[i].state)
+                printf("    ");
+            else
+                printf("--> ");
+            printf("%s \n", nodes[i].p);
         }
     }
-}
-void modifyTheTail(bool state)
-{
-    list->tail->state = state;
-}
-void printList()
-{
-    INode *temp = list->head;
-    while (temp != NULL)
-    {
-        if (temp->state)
-            printf("    ");
-        else
-            printf("--> ");
-        printf("%s\n", temp->p);
-        temp = temp->next;
-    }
-    printf("NULL\n");
 }
