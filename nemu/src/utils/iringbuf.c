@@ -3,9 +3,7 @@
 typedef struct IringNode
 {
     bool state;
-    vaddr_t pc;
     char p[128];
-    uint8_t *inst;
     struct IringNode *next;
 } INode;
 typedef struct IringList
@@ -25,21 +23,19 @@ void initIList() // initial list
 }
 
 // 创建新节点
-INode *createNode(bool state, vaddr_t pc, char *p, uint32_t inst)
+INode *createNode(bool state, char *p)
 {
     INode *newNode = (INode *)malloc(sizeof(INode));
     newNode->state = state;
-    newNode->pc = pc;
     strcpy(newNode->p, p);
-    newNode->inst = (uint8_t *)&inst;
     newNode->next = NULL;
     return newNode;
 }
 
 // 尾部插入
-void insertAtTail(bool state, vaddr_t pc, char *p, uint32_t inst)
+void insertAtTail(bool state, char *p)
 {
-    INode *newNode = createNode(state, pc, p, inst);
+    INode *newNode = createNode(state, p);
     // 如果链表为空，将新节点设置为头和尾
     if (list->head == NULL)
     {
@@ -52,7 +48,7 @@ void insertAtTail(bool state, vaddr_t pc, char *p, uint32_t inst)
         list->tail->next = newNode;
         list->tail = newNode;
         list->len++;
-        if (list->len > 10)
+        if (list->len > MAX_INST_TO_PRINT)
         {
             INode *tmp = list->head;
             list->head = list->head->next;
@@ -73,9 +69,7 @@ void printList()
             printf("    ");
         else
             printf("--> ");
-        printf("%lx ", temp->pc);
         printf("%s ", temp->p);
-        printf("%02x %02x %02x %02x\n", *temp->inst, *(temp->inst + 1), *(temp->inst + 2), *(temp->inst + 3));
         temp = temp->next;
     }
     printf("NULL\n");
