@@ -69,7 +69,7 @@ void printList()
             printf("    ");
         else
             printf("--> ");
-        printf("%s ", temp->p);
+        printf("%s\n", temp->p);
         temp = temp->next;
     }
     printf("NULL\n");
