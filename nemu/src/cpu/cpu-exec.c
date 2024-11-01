@@ -159,7 +159,7 @@ void cpu_exec(uint64_t n)
     break;
 
   case NEMU_END:
-    print_ftrace();
+    IFDEF(CONFIG_FTRACE, print_ftrace());
   case NEMU_ABORT:
     Log("nemu: %s at pc = " FMT_WORD,
         (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) : (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) : ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),

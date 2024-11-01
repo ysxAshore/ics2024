@@ -32,19 +32,24 @@ void jal_excute(word_t *dnpc, word_t pc, int rd, word_t imm)
   *dnpc = pc + imm;
   R(rd) = pc + 4;
 
+#ifdef CONFIG_FTRACE
   // call function as long as the rd is x1
   if (rd == 1)
     insert_ftrace(0, pc, *dnpc);
+#endif
 }
 
 void jalr_excute(word_t *dnpc, word_t pc, int rd, word_t src1, word_t imm, int rs)
 {
   *dnpc = (src1 + imm) & ~1;
   R(rd) = pc + 4;
+
+#ifdef CONFIG_FTRACE
   if (rd == 1)
     insert_ftrace(0, pc, *dnpc);
   else if (rd == 0 && imm == 0 && rs == 1)
     insert_ftrace(1, pc, *dnpc); // ret is jalr x0,0(x1)
+#endif
 }
 
 void bins_excute(word_t *dnpc, word_t pc, word_t src1, word_t src2, word_t imm, int type)
