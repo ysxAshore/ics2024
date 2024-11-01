@@ -26,16 +26,25 @@
 #define Bins bins_excute
 #define slts slts_excute
 
+void insert_ftrace(int type, vaddr_t insAddr, vaddr_t target);
 void jal_excute(word_t *dnpc, word_t pc, int rd, word_t imm)
 {
   *dnpc = pc + imm;
   R(rd) = pc + 4;
+
+  // call function as long as the rd is x1
+  if (rd == 1)
+    insert_ftrace(0, pc, *dnpc);
 }
 
-void jalr_excute(word_t *dnpc, word_t pc, int rd, word_t src1, word_t imm)
+void jalr_excute(word_t *dnpc, word_t pc, int rd, word_t src1, word_t imm, int rs)
 {
   *dnpc = (src1 + imm) & ~1;
   R(rd) = pc + 4;
+  if (rd == 1)
+    insert_ftrace(0, pc, *dnpc);
+  else if (rd == 0 && imm == 0 && rs == 1)
+    insert_ftrace(1, pc, *dnpc); // ret is jalr x0,0(x1)
 }
 
 void bins_excute(word_t *dnpc, word_t pc, word_t src1, word_t src2, word_t imm, int type)
@@ -296,7 +305,7 @@ static int decode_exec(Decode *s)
   INSTPAT("??????? ????? ????? 110 ????? 11000 11", bltu, B, Bins(&s->dnpc, s->pc, src1, src2, imm, 4));
   INSTPAT("??????? ????? ????? 111 ????? 11000 11", bgeu, B, Bins(&s->dnpc, s->pc, src1, src2, imm, 5));
   INSTPAT("??????? ????? ????? ??? ????? 11011 11", jal, J, Jal(&s->dnpc, s->pc, rd, imm));
-  INSTPAT("??????? ????? ????? 000 ????? 11001 11", jalr, I, Jalr(&s->dnpc, s->pc, rd, src1, imm));
+  INSTPAT("??????? ????? ????? 000 ????? 11001 11", jalr, I, Jalr(&s->dnpc, s->pc, rd, src1, imm, BITS(s->isa.inst, 19, 15)));
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak, N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv, N, INV(s->pc));
   INSTPAT_END();

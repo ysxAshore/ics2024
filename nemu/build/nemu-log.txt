@@ -1,0 +1,1 @@
+[1;34m[src/utils/log.c:30 init_log] Log is written to /home/ysxashore/Projects/ics2024/nemu/build/nemu-log.txt[0m

@@ -32,6 +32,7 @@ static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 
 void device_update();
+void print_ftrace();
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc)
 {
@@ -104,7 +105,6 @@ static void execute(uint64_t n)
         modifyNodeState(false);
         printNodes();
       }
-
 #endif
       break;
     }
@@ -159,6 +159,7 @@ void cpu_exec(uint64_t n)
     break;
 
   case NEMU_END:
+    print_ftrace();
   case NEMU_ABORT:
     Log("nemu: %s at pc = " FMT_WORD,
         (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) : (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) : ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
