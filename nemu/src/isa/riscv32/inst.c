@@ -49,6 +49,8 @@ void jalr_excute(word_t *dnpc, word_t pc, int rd, word_t src1, word_t imm, int r
     insert_ftrace(0, pc, *dnpc);
   else if (rd == 0 && imm == 0 && rs == 1)
     insert_ftrace(1, pc, *dnpc); // ret is jalr x0,0(x1)
+  else if (rd == 0 && imm == 0)
+    insert_ftrace(2, pc, *dnpc); // tail call
 #endif
 }
 

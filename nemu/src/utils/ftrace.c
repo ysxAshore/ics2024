@@ -5,15 +5,17 @@
 #include <elf.h>
 typedef struct ftraceNode
 {
-    int type; // 0 is call,1 is return
-    vaddr_t pc;
-    char originName[64];
-    char p[128];
+    int type; // 0 is call,1 is return,2 is tail_call
+    vaddr_t src;
+    vaddr_t dest;
+    char srcName[20];
+    char destName[20];
     struct ftraceNode *next;
+    struct ftraceNode *before;
 } FNode;
 typedef struct symFuncNode
 {
-    char name[64];
+    char name[20];
     Elf64_Addr addr;
     uint64_t size;
     struct symFuncNode *next;
@@ -32,6 +34,7 @@ void init_ftrace(char *elf_file)
     // initialize ftrace and symFunc list head node
     f_list = malloc(sizeof(FNode));
     f_list->next = NULL;
+    f_list->before = NULL;
     tail = f_list;
     s_list = malloc(sizeof(SFNode));
     s_list->next = NULL;
@@ -116,28 +119,48 @@ void insert_ftrace(int type, vaddr_t insAddr, vaddr_t target)
 {
     SFNode *p = s_list->next;
     FNode *temp = malloc(sizeof(FNode));
-    temp->pc = insAddr;
+    temp->src = insAddr;
+    temp->dest = target;
     temp->type = type;
     while (p)
     {
         if (insAddr >= p->addr && insAddr < p->addr + p->size)
-            strcpy(temp->originName, p->name);
-        p = p->next;
-    }
-    p = s_list->next;
-    while (p)
-    {
+            strcpy(temp->srcName, p->name);
         if (target >= p->addr && target < p->addr + p->size)
-        {
-            sprintf(temp->p, temp->type ? "ret [%s to %s]" : "call [%s to %s@%lx]", temp->originName, p->name, p->addr);
-            // in order to output easily,use tail insert
-            temp->next = NULL;
-            tail->next = temp;
-            tail = temp;
-            break;
-        }
+            strcpy(temp->destName, p->name);
         p = p->next;
     }
+    temp->next = NULL;
+    temp->before = tail;
+    tail->next = temp;
+    tail = temp;
+}
+
+void print_oneTrace(vaddr_t pc, int k, char *p)
+{
+    printf("0x%lx: ", pc);
+    for (int i = 0; i < k; i++)
+        printf(" ");
+    printf("%s\n", p);
+}
+
+FNode *print_tailRet(FNode *p, int *k)
+{
+    char log[64] = {0};
+    FNode *i = p->before;
+    while (i)
+    {
+        if (i->type == 2 && strcmp(p->destName, i->srcName))
+        {
+            --*k;
+            sprintf(log, "tail ret from [%s]", i->srcName);
+            print_oneTrace(p->src, *k, log);
+        }
+        else
+            break;
+        i = i->before;
+    }
+    return i->before;
 }
 
 /*
@@ -147,16 +170,32 @@ void print_ftrace()
 {
     FNode *p = f_list->next;
     int k = 0; // control space num
+    char log[64] = {0};
     while (p)
     {
-        if (p->type)
-            --k;
-        printf("0x%lx: ", p->pc);
-        for (int i = 0; i < k; i++)
-            printf(" ");
-        printf("%s\n", p->p);
-        if (!p->type)
+        if (p->type == 0)
+        {
+            sprintf(log, "call to [%s@%lx]", p->destName, p->dest);
+            print_oneTrace(p->src, k, log);
             ++k;
+        }
+        else if (p->type == 2)
+        {
+            sprintf(log, "tail call to [%s@%lx]", p->destName, p->dest);
+            print_oneTrace(p->src, k, log);
+            ++k;
+        }
+        else
+        {
+            --k;
+            sprintf(log, "ret from [%s]", p->srcName);
+            print_oneTrace(p->src, k, log);
+            FNode *q = print_tailRet(p, &k);
+            if (q != NULL)
+                q->next = p->next;
+            if (p->next != NULL)
+                p->next->before = q;
+        }
         p = p->next;
     }
 }
