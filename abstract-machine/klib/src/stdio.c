@@ -46,7 +46,7 @@ int sprintf(char *out, const char *fmt, ...)
   va_list arglist;
   va_start(arglist, fmt);
   int num = 0;
-  char tmp_str[20] = {'\0'};
+  char tmp_str[32] = {'\0'};
   *out = '\0';
   for (int i = 0; i < strlen(fmt); ++i)
   {
