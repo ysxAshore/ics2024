@@ -40,18 +40,15 @@ void init_ftrace(char *elf_file)
     s_list->next = NULL;
 
     // make sure that elf_file is not null
-    if (elf_file == NULL)
-        assert("Please given the path of elf file\n");
+    ASSERT_WITH_MSG(elf_file, "Please given the path of elf file\n");
 
     // if not,initialize file pointer
     FILE *fp = fp = fopen(elf_file, "rb");
-    if (fp == NULL)
-        assert("Can not open the given path elf_file ");
+    ASSERT_WITH_MSG(fp, "Can not open the given path elf_file\n");
 
     // read ELF header
     Elf64_Ehdr edhr;
-    if (fread(&edhr, sizeof(Elf64_Ehdr), 1, fp) < 1)
-        assert("Reading the ELF header failed\n");
+    ASSERT_WITH_MSG(fread(&edhr, sizeof(Elf64_Ehdr), 1, fp) >= 1, "Reading the ELF header failed\n");
 
     // make sure the ELF header magic number
     if (edhr.e_ident[0] != 0x7F ||
@@ -59,6 +56,11 @@ void init_ftrace(char *elf_file)
         edhr.e_ident[2] != 'L' ||
         edhr.e_ident[3] != 'F')
         assert("The given path is not a elf file");
+    ASSERT_WITH_MSG(edhr.e_ident[0] == 0x7F &&
+                        edhr.e_ident[1] == 'E' &&
+                        edhr.e_ident[2] == 'L' &&
+                        edhr.e_ident[3] == 'F',
+                    "The given path is not a elf file\n");
 
     // read section table and judge the section is or not is strtab
     // if is read strtab
@@ -66,14 +68,12 @@ void init_ftrace(char *elf_file)
     Elf64_Shdr shdr;
     for (int i = 0; i < edhr.e_shnum; ++i)
     {
-        if (fread(&shdr, sizeof(Elf64_Shdr), 1, fp) < 1)
-            assert("Reading the ELF Section header failed\n");
+        ASSERT_WITH_MSG(fread(&shdr, sizeof(Elf64_Shdr), 1, fp) >= 1, "Reading the ELF Section header failed\n");
         if (shdr.sh_type == SHT_STRTAB)
         {
             fseek(fp, shdr.sh_offset, SEEK_SET);
             strtab = malloc(shdr.sh_size);
-            if (fread(strtab, shdr.sh_size, 1, fp) < 1)
-                assert("Reading the string tab section failed\n");
+            ASSERT_WITH_MSG(fread(strtab, shdr.sh_size, 1, fp) >= 1, "Reading the string tab section failed\n");
             break;
         }
     }
@@ -84,8 +84,7 @@ void init_ftrace(char *elf_file)
     fseek(fp, edhr.e_shoff, SEEK_SET);
     for (int i = 0; i < edhr.e_shnum; ++i)
     {
-        if (fread(&shdr, sizeof(Elf64_Shdr), 1, fp) < 1)
-            assert("Reading the ELF Section header failed\n");
+        ASSERT_WITH_MSG(fread(&shdr, sizeof(Elf64_Shdr), 1, fp) >= 1, "Reading the ELF Section header failed\n");
         if (shdr.sh_type == SHT_SYMTAB)
         {
             fseek(fp, shdr.sh_offset, SEEK_SET);
@@ -94,8 +93,7 @@ void init_ftrace(char *elf_file)
 
             for (int j = 0; j < num; ++j)
             {
-                if (fread(&sym, sizeof(Elf64_Sym), 1, fp) < 1)
-                    assert("Reading the Symbol line failed\n");
+                ASSERT_WITH_MSG(fread(&sym, sizeof(Elf64_Sym), 1, fp) >= 1, "Reading the Symbol line failed\n");
                 if (ELF64_ST_TYPE(sym.st_info) == STT_FUNC)
                 {
                     SFNode *temp = malloc(sizeof(SFNode));
