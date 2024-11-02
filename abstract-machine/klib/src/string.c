@@ -106,34 +106,63 @@ void *memset(void *s, int c, size_t n)
 
 void *memmove(void *dst, const void *src, size_t n)
 {
-  char *tmp1 = (char *)dst;
-  char *tmp2 = (char *)src;
-  char tmp[n];
-  strncpy(tmp, tmp2, n);
-  strncpy(tmp1, tmp, n);
+  unsigned char *d = (unsigned char *)dst;
+  const unsigned char *s = (const unsigned char *)src;
+
+  // 如果 dest 和 src 是相同的地址，直接返回
+  if (d == s)
+  {
+    return dst;
+  }
+
+  // 判断是否是重叠区域，src 在 dest 前：从后往前复制  src oveleap dest
+  if (s < d && s + n > d)
+  {
+    // 从后向前复制
+    d += n;
+    s += n;
+    while (n--)
+    {
+      *(--d) = *(--s);
+    }
+  }
+  else
+  {
+    // 非重叠情况或 src 在 dest 前：从前向后复制
+    while (n--)
+    {
+      *d++ = *s++;
+    }
+  }
+
   return dst;
 }
 
 void *memcpy(void *out, const void *in, size_t n)
 {
-  uintptr_t out_start = (uintptr_t)out;
-  uintptr_t out_end = out_start + n;
-  uintptr_t in_start = (uintptr_t)in;
-  uintptr_t in_end = in_start + n;
-  assert((out_start < in_end) && (in_start < out_end));
-
-  // 不重叠才能用memcpy
-  char *tmp1 = (char *)out;
-  char *tmp2 = (char *)in;
-  strncpy(tmp1, tmp2, n);
+  unsigned char *d = (unsigned char *)out;
+  const unsigned char *s = (const unsigned char *)in;
+  while (n--)
+  {
+    *d++ = *s++;
+  }
   return out;
 }
 
 int memcmp(const void *s1, const void *s2, size_t n)
 {
-  char *tmp1 = (char *)s1;
-  char *tmp2 = (char *)s2;
-  return strncmp(tmp1, tmp2, n);
+  unsigned char *tmp1 = (unsigned char *)s1;
+  unsigned char *tmp2 = (unsigned char *)s2;
+  for (size_t i = 0; i < n; i++)
+  {
+    if (*tmp1 > *tmp2)
+      return 1;
+    else if (*tmp1 < *tmp2)
+      return -1;
+    tmp1 = tmp1 + 1;
+    tmp2 = tmp2 + 1;
+  }
+  return 0;
 }
 
 #endif
