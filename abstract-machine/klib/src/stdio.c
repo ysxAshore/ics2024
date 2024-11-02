@@ -2,6 +2,7 @@
 #include <klib.h>
 #include <klib-macros.h>
 #include <stdarg.h>
+#include <limits.h>
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
@@ -19,9 +20,14 @@ void int2str(char *str, int value)
 {
   // 处理负数
   int is_negative = value < 0;
+  if (value == INT_MIN)
+  {
+    strcpy(str, "-2147483648");
+    return;
+  }
   if (is_negative)
   {
-    value = -value;
+    value = -value; // 处理INT_MIN时会溢出
   }
   // 计算字符串长度
   int length = is_negative ? 1 : 0; // 负号的长度
