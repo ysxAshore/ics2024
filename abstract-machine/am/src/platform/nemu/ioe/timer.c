@@ -3,12 +3,15 @@
 #include <time.h>
 void __am_timer_init()
 {
+  outl(RTC_ADDR, 0);
+  outl(RTC_ADDR + 4, 0);
 }
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime)
 {
+
+  uint32_t high32 = inl(RTC_ADDR + 4);
   uint32_t low32 = inl(RTC_ADDR);
-  uint32_t high32 = inl(RTC_ADDR + 0x4);
   uptime->us = ((uint64_t)high32 << 32) | low32;
 }
 
