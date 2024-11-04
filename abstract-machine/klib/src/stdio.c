@@ -6,16 +6,6 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-int printf(const char *fmt, ...)
-{
-  panic("Not implemented");
-}
-
-int vsprintf(char *out, const char *fmt, va_list ap)
-{
-  panic("Not implemented");
-}
-
 void int2str(char *str, int value)
 {
   // 处理负数
@@ -47,27 +37,36 @@ void int2str(char *str, int value)
     str[0] = '-'; // 添加负号
   }
 }
-int sprintf(char *out, const char *fmt, ...)
+
+int printf(const char *fmt, ...)
 {
+  char temp[256];
   va_list arglist;
   va_start(arglist, fmt);
-  int num = 0;
+  int num = vsprintf(temp, fmt, arglist);
+  va_end(arglist);
+  for (int i = 0; i < num; i++)
+    putch(temp[i]);
+  return num;
+}
+
+int vsprintf(char *out, const char *fmt, va_list ap)
+{
   char tmp_str[32] = {'\0'};
   *out = '\0';
   for (int i = 0; i < strlen(fmt); ++i)
   {
     if (fmt[i] == '%' && i + 1 < strlen(fmt) && (fmt[i + 1] == 'd' || fmt[i + 1] == 's'))
     {
-      ++num;
       if (fmt[i + 1] == 'd')
       {
-        int temp = va_arg(arglist, int);
+        int temp = va_arg(ap, int);
         int2str(tmp_str, temp);
         strcat(out, tmp_str);
       }
       else if (fmt[i + 1] == 's')
       {
-        char *tmp_str = va_arg(arglist, char *);
+        char *tmp_str = va_arg(ap, char *);
         strcat(out, tmp_str);
       }
       i = i + 1;
@@ -79,8 +78,16 @@ int sprintf(char *out, const char *fmt, ...)
       strcat(out, tmp_str);
     }
   }
-  va_end(arglist);
   return strlen(out);
+}
+
+int sprintf(char *out, const char *fmt, ...)
+{
+  va_list arglist;
+  va_start(arglist, fmt);
+  int num = vsprintf(out, fmt, arglist);
+  va_end(arglist);
+  return num;
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...)
