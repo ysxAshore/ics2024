@@ -49,27 +49,70 @@ int printf(const char *fmt, ...)
     putch(temp[i]);
   return num;
 }
-
 int vsprintf(char *out, const char *fmt, va_list ap)
 {
   char tmp_str[32] = {'\0'};
   *out = '\0';
   for (int i = 0; i < strlen(fmt); ++i)
   {
-    if (fmt[i] == '%' && i + 1 < strlen(fmt) && (fmt[i + 1] == 'd' || fmt[i + 1] == 's'))
+    if (fmt[i] == '%' && i + 1 < strlen(fmt))
     {
-      if (fmt[i + 1] == 'd')
+      int temp;
+      int width;
+      switch (fmt[i + 1])
       {
-        int temp = va_arg(ap, int);
+      case '0':
+        width = fmt[i + 2] - '0';
+        temp = va_arg(ap, int);
+        int2str(tmp_str, temp);
+        if (strlen(tmp_str) >= width)
+          strcat(out, tmp_str);
+        else
+        {
+          int right = width - strlen(tmp_str);
+          for (int j = strlen(tmp_str); j >= 0; --j)
+            tmp_str[j + right] = tmp_str[j];
+          for (int j = 0; j < right; ++j)
+            tmp_str[j] = '0';
+          strcat(out, tmp_str);
+        }
+        i = i + 2;
+        break;
+      case '1' ... '9':
+        width = fmt[i + 2] - '0';
+        temp = va_arg(ap, int);
+        int2str(tmp_str, temp);
+        if (strlen(tmp_str) >= width)
+          strcat(out, tmp_str);
+        else
+        {
+          int right = width - strlen(tmp_str);
+          for (int j = strlen(tmp_str); j >= 0; --j)
+            tmp_str[j + right] = tmp_str[j];
+          for (int j = 0; j < right; ++j)
+            tmp_str[j] = ' ';
+          strcat(out, tmp_str);
+        }
+        i = i + 1;
+        break;
+      case 'c':
+        tmp_str[0] = fmt[i + 1];
+        tmp_str[1] = '\0';
+        strcat(out, tmp_str);
+        break;
+      case 'd':
+        temp = va_arg(ap, int);
         int2str(tmp_str, temp);
         strcat(out, tmp_str);
-      }
-      else if (fmt[i + 1] == 's')
-      {
-        char *tmp_str = va_arg(ap, char *);
+        break;
+      case 's':
+        strcpy(tmp_str, va_arg(ap, char *));
         strcat(out, tmp_str);
+        break;
+      default:
+        break;
       }
-      i = i + 1;
+      ++i;
     }
     else
     {
