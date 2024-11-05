@@ -96,7 +96,7 @@ int vsprintf(char *out, const char *fmt, va_list ap)
         i = i + 1;
         break;
       case 'c':
-        tmp_str[0] = va_arg(ap, int);
+        tmp_str[0] = (char)va_arg(ap, int);
         tmp_str[1] = '\0';
         strcat(out, tmp_str);
         break;
