@@ -40,7 +40,7 @@ void int2str(char *str, int value)
 
 int printf(const char *fmt, ...)
 {
-  char temp[256];
+  char temp[512];
   va_list arglist;
   va_start(arglist, fmt);
   int num = vsprintf(temp, fmt, arglist);
@@ -51,7 +51,7 @@ int printf(const char *fmt, ...)
 }
 int vsprintf(char *out, const char *fmt, va_list ap)
 {
-  char tmp_str[32] = {'\0'};
+  char tmp_str[256] = {'\0'};
   *out = '\0';
   for (int i = 0; i < strlen(fmt); ++i)
   {
