@@ -163,7 +163,7 @@ void mret_excute(vaddr_t *dnpc)
   if (cpu.csrs.mcause == 0xb)
   {
     *dnpc = cpu.csrs.mepc + 4;
-    difftest_skip_ref();
+    IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());
   }
   else
     *dnpc = cpu.csrs.mepc;
