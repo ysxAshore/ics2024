@@ -27,6 +27,7 @@
 #define slts slts_excute
 
 void insert_ftrace(int type, vaddr_t insAddr, vaddr_t target);
+void difftest_skip_ref();
 void jal_excute(word_t *dnpc, word_t pc, int rd, word_t imm)
 {
   *dnpc = pc + imm;
@@ -106,6 +107,68 @@ void slts_excute(word_t src1, word_t src2, int rd, int type)
   }
 }
 
+void csrrw_excute(word_t src1, word_t imm, int rd)
+{
+  switch (imm)
+  {
+  case 0x300:
+    R(rd) = cpu.csrs.mstatus;
+    cpu.csrs.mstatus = src1;
+    break;
+  case 0x305:
+    R(rd) = cpu.csrs.mtvec;
+    cpu.csrs.mtvec = src1;
+    break;
+  case 0x341:
+    R(rd) = cpu.csrs.mepc;
+    cpu.csrs.mepc = src1;
+    break;
+  case 0x342:
+    R(rd) = cpu.csrs.mcause;
+    cpu.csrs.mcause = src1;
+    break;
+  default:
+    panic("The %lx csr not implemented", imm);
+    break;
+  }
+}
+void csrrs_excute(word_t src1, word_t imm, int rd)
+{
+  switch (imm)
+  {
+  case 0x300:
+    R(rd) = cpu.csrs.mstatus;
+    cpu.csrs.mstatus |= src1;
+    break;
+  case 0x305:
+    R(rd) = cpu.csrs.mtvec;
+    cpu.csrs.mtvec |= src1;
+    break;
+  case 0x341:
+    R(rd) = cpu.csrs.mepc;
+    cpu.csrs.mepc |= src1;
+    break;
+  case 0x342:
+    R(rd) = cpu.csrs.mcause;
+    cpu.csrs.mcause |= src1;
+    break;
+  default:
+    panic("The %lx csr not implemented", imm);
+    break;
+  }
+}
+
+void mret_excute(vaddr_t *dnpc)
+{
+  if (cpu.csrs.mcause == 0xb)
+  {
+    *dnpc = cpu.csrs.mepc + 4;
+    difftest_skip_ref();
+  }
+  else
+    *dnpc = cpu.csrs.mepc;
+}
+
 // 用spike的乘法实现
 word_t mulhuALU(word_t a, word_t b)
 {
@@ -140,7 +203,6 @@ int64_t mulhsuALU(int64_t a, uint64_t b)
   uint64_t res = mulhuALU(a < 0 ? -a : a, b);
   return negate ? ~res + (a * b == 0) : res;
 }
-
 enum
 {
   TYPE_R,
@@ -237,6 +299,7 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
 static int decode_exec(Decode *s)
 {
   s->dnpc = s->snpc;
+  bool sign = false;
 
 #define INSTPAT_INST(s) ((s)->isa.inst)
 #define INSTPAT_MATCH(s, name, type, ... /* execute body */)         \
@@ -314,6 +377,10 @@ static int decode_exec(Decode *s)
   INSTPAT("??????? ????? ????? ??? ????? 11011 11", jal, J, Jal(&s->dnpc, s->pc, rd, imm));
   INSTPAT("??????? ????? ????? 000 ????? 11001 11", jalr, I, Jalr(&s->dnpc, s->pc, rd, src1, imm, BITS(s->isa.inst, 19, 15)));
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak, N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw, I, csrrw_excute(src1, imm, rd));
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs, I, csrrs_excute(src1, imm, rd));
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret, R, mret_excute(&s->dnpc));
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall, R, s->dnpc = isa_raise_intr(isa_reg_str2val("a7", &sign), s->pc));
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv, N, INV(s->pc));
   INSTPAT_END();
 

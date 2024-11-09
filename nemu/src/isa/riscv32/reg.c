@@ -39,6 +39,18 @@ void isa_reg_display()
     printf(FMT_WORD, cpu.gpr[i + 3]);
     printf("\n");
   }
+  printf("mstatus: \t");
+  printf(FMT_WORD, cpu.csrs.mstatus);
+  printf("\n");
+  printf("mcause: \t");
+  printf(FMT_WORD, cpu.csrs.mcause);
+  printf("\n");
+  printf("mepc: \t");
+  printf(FMT_WORD, cpu.csrs.mepc);
+  printf("\n");
+  printf("mtvec: \t");
+  printf(FMT_WORD, cpu.csrs.mtvec);
+  printf("\n");
 }
 
 word_t isa_reg_str2val(const char *s, bool *success)
@@ -61,6 +73,26 @@ word_t isa_reg_str2val(const char *s, bool *success)
   {
     *success = true;
     return cpu.pc;
+  }
+  else if (strcmp("mstatus", s + 1) == 0)
+  {
+    *success = true;
+    return cpu.csrs.mstatus;
+  }
+  else if (strcmp("mcause", s + 1) == 0)
+  {
+    *success = true;
+    return cpu.csrs.mcause;
+  }
+  else if (strcmp("mepc", s + 1) == 0)
+  {
+    *success = true;
+    return cpu.csrs.mepc;
+  }
+  else if (strcmp("mtvec", s + 1) == 0)
+  {
+    *success = true;
+    return cpu.csrs.mtvec;
   }
   else
     return 0;
