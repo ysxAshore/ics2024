@@ -27,6 +27,7 @@ void int2str(char *str, int value)
     length++;
     temp /= 10;
   } while (temp != 0);
+  str[length] = '\0';
   for (int i = length - 1; i >= 0; i--)
   {
     str[i] = (value % 10) + '0'; // 转换为字符
@@ -169,6 +170,7 @@ int vsprintf(char *out, const char *fmt, va_list ap)
       case 'd':
         temp = va_arg(ap, int);
         int2str(tmp_str, temp);
+        printf("\n%s\n", tmp_str);
         strcat(out, tmp_str);
         break;
       case 's':
