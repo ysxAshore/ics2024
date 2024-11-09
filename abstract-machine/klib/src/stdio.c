@@ -49,6 +49,18 @@ int printf(const char *fmt, ...)
     putch(temp[i]);
   return num;
 }
+void uint32_to_hex_string(uint32_t num, char *hex_str)
+{
+  const char hex_digits[] = "0123456789abcdef";
+  hex_str[0] = '0';
+  hex_str[1] = 'x';
+  for (int i = 0; i < 8; i++)
+    // 提取每4位的值，从最高有效位（MSB）到最低有效位（LSB）
+    hex_str[9 - i] = hex_digits[(num >> (i * 4)) & 0xF];
+
+  // 字符串结尾
+  hex_str[10] = '\0';
+}
 int vsprintf(char *out, const char *fmt, va_list ap)
 {
   char tmp_str[1500] = {'\0'};
@@ -59,6 +71,7 @@ int vsprintf(char *out, const char *fmt, va_list ap)
     {
       int temp;
       int width;
+      uint32_t temp_u;
       switch (fmt[i + 1])
       {
       case '0':
@@ -107,6 +120,11 @@ int vsprintf(char *out, const char *fmt, va_list ap)
         break;
       case 's':
         strcpy(tmp_str, va_arg(ap, char *));
+        strcat(out, tmp_str);
+        break;
+      case 'p':
+        temp_u = va_arg(ap, uint32_t);
+        uint32_to_hex_string(temp_u, tmp_str);
         strcat(out, tmp_str);
         break;
       default:
