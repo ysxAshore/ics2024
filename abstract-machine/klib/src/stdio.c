@@ -38,6 +38,32 @@ void int2str(char *str, int value)
   }
 }
 
+void uint32_to_hex_string(uint32_t num, char *hex_str)
+{
+  const char hex_digits[] = "0123456789abcdef";
+  int started = 0; // 标记是否遇到第一个非0字符
+  int idx = 0;     // hex_str的索引
+
+  // 如果num是0，则直接返回"0"
+  if (num == 0)
+    hex_str[idx++] = '0';
+  else
+  {
+    for (int i = 7; i >= 0; i--)
+    {
+      // 提取最高位的4位
+      uint8_t nibble = (num >> (i * 4)) & 0xF;
+      // 跳过前导0
+      if (nibble != 0 || started)
+      {
+        hex_str[idx++] = hex_digits[nibble];
+        started = 1;
+      }
+    }
+  }
+  hex_str[idx] = '\0'; // 字符串结尾
+}
+
 int printf(const char *fmt, ...)
 {
   char temp[1500];
@@ -49,18 +75,7 @@ int printf(const char *fmt, ...)
     putch(temp[i]);
   return num;
 }
-void uint32_to_hex_string(uint32_t num, char *hex_str)
-{
-  const char hex_digits[] = "0123456789abcdef";
-  hex_str[0] = '0';
-  hex_str[1] = 'x';
-  for (int i = 0; i < 8; i++)
-    // 提取每4位的值，从最高有效位（MSB）到最低有效位（LSB）
-    hex_str[9 - i] = hex_digits[(num >> (i * 4)) & 0xF];
 
-  // 字符串结尾
-  hex_str[10] = '\0';
-}
 int vsprintf(char *out, const char *fmt, va_list ap)
 {
   char tmp_str[1500] = {'\0'};
@@ -76,35 +91,73 @@ int vsprintf(char *out, const char *fmt, va_list ap)
       {
       case '0':
         width = fmt[i + 2] - '0';
-        temp = va_arg(ap, int);
-        int2str(tmp_str, temp);
-        if (strlen(tmp_str) >= width)
-          strcat(out, tmp_str);
-        else
+        if (fmt[i + 3] == 'd')
         {
-          int right = width - strlen(tmp_str);
-          for (int j = strlen(tmp_str); j >= 0; --j)
-            tmp_str[j + right] = tmp_str[j];
-          for (int j = 0; j < right; ++j)
-            tmp_str[j] = '0';
-          strcat(out, tmp_str);
+          temp = va_arg(ap, int);
+          int2str(tmp_str, temp);
+          if (strlen(tmp_str) >= width)
+            strcat(out, tmp_str);
+          else
+          {
+            int right = width - strlen(tmp_str);
+            for (int j = strlen(tmp_str); j >= 0; --j)
+              tmp_str[j + right] = tmp_str[j];
+            for (int j = 0; j < right; ++j)
+              tmp_str[j] = '0';
+            strcat(out, tmp_str);
+          }
+        }
+        else if (fmt[i + 3] == 'x')
+        {
+          temp_u = va_arg(ap, uint32_t);
+          uint32_to_hex_string(temp_u, tmp_str);
+          if (strlen(tmp_str) >= width)
+            strcat(out, tmp_str);
+          else
+          {
+            int right = width - strlen(tmp_str);
+            for (int j = strlen(tmp_str); j >= 0; --j)
+              tmp_str[j + right] = tmp_str[j];
+            for (int j = 0; j < right; ++j)
+              tmp_str[j] = '0';
+            strcat(out, tmp_str);
+          }
         }
         i = i + 2;
         break;
       case '1' ... '9':
-        width = fmt[i + 2] - '0';
-        temp = va_arg(ap, int);
-        int2str(tmp_str, temp);
-        if (strlen(tmp_str) >= width)
-          strcat(out, tmp_str);
-        else
+        width = fmt[i + 1] - '0';
+        if (fmt[i + 2] == 'd')
         {
-          int right = width - strlen(tmp_str);
-          for (int j = strlen(tmp_str); j >= 0; --j)
-            tmp_str[j + right] = tmp_str[j];
-          for (int j = 0; j < right; ++j)
-            tmp_str[j] = ' ';
-          strcat(out, tmp_str);
+          temp = va_arg(ap, int);
+          int2str(tmp_str, temp);
+          if (strlen(tmp_str) >= width)
+            strcat(out, tmp_str);
+          else
+          {
+            int right = width - strlen(tmp_str);
+            for (int j = strlen(tmp_str); j >= 0; --j)
+              tmp_str[j + right] = tmp_str[j];
+            for (int j = 0; j < right; ++j)
+              tmp_str[j] = ' ';
+            strcat(out, tmp_str);
+          }
+        }
+        else if (fmt[i + 2] == 'x')
+        {
+          temp_u = va_arg(ap, int);
+          uint32_to_hex_string(temp_u, tmp_str);
+          if (strlen(tmp_str) >= width)
+            strcat(out, tmp_str);
+          else
+          {
+            int right = width - strlen(tmp_str);
+            for (int j = strlen(tmp_str); j >= 0; --j)
+              tmp_str[j + right] = tmp_str[j];
+            for (int j = 0; j < right; ++j)
+              tmp_str[j] = ' ';
+            strcat(out, tmp_str);
+          }
         }
         i = i + 1;
         break;
@@ -122,12 +175,22 @@ int vsprintf(char *out, const char *fmt, va_list ap)
         strcpy(tmp_str, va_arg(ap, char *));
         strcat(out, tmp_str);
         break;
-      case 'p':
+      case 'x':
         temp_u = va_arg(ap, uint32_t);
         uint32_to_hex_string(temp_u, tmp_str);
         strcat(out, tmp_str);
         break;
+      case 'p':
+        temp_u = va_arg(ap, uint32_t);
+        tmp_str[0] = '0';
+        tmp_str[1] = 'x';
+        uint32_to_hex_string(temp_u, tmp_str + 2);
+        strcat(out, tmp_str);
+        break;
       default:
+        tmp_str[0] = fmt[i];
+        tmp_str[1] = '\0';
+        strcat(out, tmp_str);
         break;
       }
       ++i;
