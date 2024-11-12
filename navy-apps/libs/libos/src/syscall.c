@@ -70,7 +70,16 @@ int _write(int fd, void *buf, size_t count) {
   return 0;
 }
 
+// 一个 static 局部变量在函数内声明后只会在第一次调用时被初始化，此后函数的每次调用都不会再次执行该初始化
+extern char end;
 void *_sbrk(intptr_t increment) {
+  static intptr_t program_break = (intptr_t)&end;
+  intptr_t new_break = program_break + increment;
+  if(_syscall_(SYS_brk,new_break,0,0) == 0){
+  	intptr_t old_break = program_break;
+  	program_break = new_break;
+  	return (void*)old_break;
+  }
   return (void *)-1;
 }
 
