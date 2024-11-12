@@ -21,6 +21,21 @@ void do_syscall(Context *c)
     Log("Thers is a SYS_yield syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, c->GPRx);
 #endif
     break;
+  case 4:
+    int ret = 0;
+    if (c->GPR2 == 1 || c->GPR2 == 2)
+    {
+      for (int i = 0; i < c->GPR4; i++)
+      {
+        putch(((char *)c->GPR3)[i]);
+        ++ret;
+      }
+    }
+    c->GPRx = ret;
+#ifdef CONFIG_STRACE
+    Log("Thers is a SYS_write syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, c->GPRx);
+#endif
+    break;
   default:
     panic("Unhandled syscall ID = %d", a[0]);
   }
