@@ -20,7 +20,7 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc)
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * Then return the address of the interrupt/exception vector.
    */
-  cpu.csrs.mcause = NO == -1 ? 0xb : NO;
+  cpu.csrs.mcause = 0xb; // in m-mode,enviroment call always is 0xb
   cpu.csrs.mepc = epc;
   IFDEF(CONFIG_ETRACE, printf("\nThere is a No.%ld exception at " FMT_WORD "\n", NO, epc));
   return cpu.csrs.mtvec;

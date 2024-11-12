@@ -15,14 +15,14 @@ struct Context
 };
 
 #ifdef __riscv_e
-#define GPR1 gpr[15] // a5
+#define GPR1 gpr[15]
 #else
-#define GPR1 gpr[17] // a7
+#define GPR1 gpr[17]
 #endif
 
-#define GPR2 gpr[0]
-#define GPR3 gpr[0]
-#define GPR4 gpr[0]
-#define GPRx gpr[0]
+#define GPR2 gpr[10]
+#define GPR3 gpr[11]
+#define GPR4 gpr[12]
+#define GPRx gpr[10]
 
 #endif
