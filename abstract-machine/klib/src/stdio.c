@@ -170,7 +170,6 @@ int vsprintf(char *out, const char *fmt, va_list ap)
       case 'd':
         temp = va_arg(ap, int);
         int2str(tmp_str, temp);
-        printf("\n%s\n", tmp_str);
         strcat(out, tmp_str);
         break;
       case 's':
