@@ -67,7 +67,7 @@ int _open(const char *path, int flags, mode_t mode) {
 
 int _write(int fd, void *buf, size_t count) {
   int result = _syscall_(SYS_write,fd,(intptr_t)buf,count);
-  return 0;
+  return result;
 }
 
 // 一个 static 局部变量在函数内声明后只会在第一次调用时被初始化，此后函数的每次调用都不会再次执行该初始化

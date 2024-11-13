@@ -25,7 +25,6 @@ void do_syscall(Context *c)
     int ret = 0;
     if (c->GPR2 == 1 || c->GPR2 == 2)
     {
-      printf("\n%d\n", c->GPR2);
       for (int i = 0; i < c->GPR4; i++)
       {
         putch(((char *)c->GPR3)[i]);
