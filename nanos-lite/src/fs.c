@@ -2,6 +2,7 @@
 
 size_t ramdisk_read(void *buf, size_t offset, size_t len);
 size_t ramdisk_write(const void *buf, size_t offset, size_t len);
+size_t serial_write(const void *buf, size_t offset, size_t len);
 
 typedef size_t (*ReadFn)(void *buf, size_t offset, size_t len);
 typedef size_t (*WriteFn)(const void *buf, size_t offset, size_t len);
@@ -40,8 +41,8 @@ size_t invalid_write(const void *buf, size_t offset, size_t len)
 // 通过添加 __attribute__((used))，你告诉编译器即使在程序中没有显式引用 file_table，也不要将其优化掉
 static Finfo file_table[] __attribute__((used)) = {
     [FD_STDIN] = {"stdin", 0, 0, 0, invalid_read, invalid_write},
-    [FD_STDOUT] = {"stdout", 0, 0, 0, invalid_read, invalid_write},
-    [FD_STDERR] = {"stderr", 0, 0, 0, invalid_read, invalid_write},
+    [FD_STDOUT] = {"stdout", 0, 0, 0, invalid_read, serial_write},
+    [FD_STDERR] = {"stderr", 0, 0, 0, invalid_read, serial_write},
 #include "files.h"
 };
 
@@ -62,33 +63,29 @@ int fs_open(const char *pathname, int flags, int mode)
 size_t fs_read(int fd, void *buf, size_t len)
 {
   assert(fd >= 0 && fd < sizeof(file_table) / sizeof(file_table[0]));
-  if (fd <= 2)
-    return 0;
-  len = file_table[fd].open_offset + len <= file_table[fd].size ? len : file_table[fd].size - file_table[fd].open_offset;
-  int result = ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, len);
-  file_table[fd].open_offset += result;
-  return result;
+  if (file_table[fd].read != NULL)
+    return file_table[fd].read(buf, 0, len);
+  else
+  {
+    len = file_table[fd].open_offset + len <= file_table[fd].size ? len : file_table[fd].size - file_table[fd].open_offset;
+    int result = ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, len);
+    file_table[fd].open_offset += result;
+    return result;
+  }
 }
 
 size_t fs_write(int fd, const void *buf, size_t len)
 {
   assert(fd >= 0 && fd < sizeof(file_table) / sizeof(file_table[0]));
-  int result = 0;
-  if (fd == 1 || fd == 2)
-  {
-    for (size_t i = 0; i < len; i++)
-    {
-      putch(((char *)buf)[i]);
-      ++result;
-    }
-  }
-  else if (fd != 0)
+  if (file_table[fd].write != NULL)
+    return file_table[fd].write(buf, 0, len);
+  else
   {
     len = file_table[fd].open_offset + len <= file_table[fd].size ? len : file_table[fd].size - file_table[fd].open_offset;
-    result = ramdisk_write(buf, file_table[fd].open_offset, len);
+    int result = ramdisk_write(buf, file_table[fd].open_offset, len);
     file_table[fd].open_offset += result;
+    return result;
   }
-  return result;
 }
 
 size_t fs_lseek(int fd, size_t offset, int whence)
