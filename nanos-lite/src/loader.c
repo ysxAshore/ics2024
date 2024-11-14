@@ -24,12 +24,16 @@
 #endif
 
 size_t ramdisk_read(void *buf, size_t offset, size_t len);
+int fs_open(const char *pathname, int flags, int mode);
+size_t fs_read(int fd, void *buf, size_t len);
+size_t fs_lseek(int fd, size_t offset, int whence);
 
 static uintptr_t loader(PCB *pcb, const char *filename)
 {
+  int fd = fs_open(filename, 0, 0);
   // read ELF Header and examine
   Elf_Ehdr ehdr;
-  ramdisk_read(&ehdr, 0, sizeof(Elf_Ehdr));
+  fs_read(fd, &ehdr, sizeof(Elf_Ehdr));
   if (ehdr.e_ident[0] != 0x7F ||
       ehdr.e_ident[1] != 'E' ||
       ehdr.e_ident[2] != 'L' ||
@@ -38,14 +42,17 @@ static uintptr_t loader(PCB *pcb, const char *filename)
   if (ehdr.e_machine != EXPECT_TYPE)
     panic("The ramdisk content is not match the current machine\n");
 
+  fs_lseek(fd, ehdr.e_phoff, 0);
   // read ELF Program Segement Header
   Elf_Phdr phdrs[ehdr.e_phnum];
-  ramdisk_read(phdrs, ehdr.e_phoff, sizeof(Elf_Phdr) * ehdr.e_phnum);
+  // ramdisk_read(phdrs, ehdr.e_phoff, sizeof(Elf_Phdr) * ehdr.e_phnum);
+  fs_read(fd, phdrs, sizeof(Elf_Phdr) * ehdr.e_phnum);
   for (int i = 0; i < ehdr.e_phnum; i++)
   {
     if (phdrs[i].p_type == PT_LOAD)
     {
-      ramdisk_read((void *)phdrs[i].p_vaddr, phdrs[i].p_offset, phdrs[i].p_filesz);
+      fs_lseek(fd, phdrs[i].p_offset, 0);
+      fs_read(fd, (void *)phdrs[i].p_vaddr, phdrs[i].p_filesz);
       // void *memset(void *s, int c, size_t n)
       memset((void *)(phdrs[i].p_vaddr + phdrs[i].p_filesz), 0, phdrs[i].p_memsz - phdrs[i].p_filesz);
     }
