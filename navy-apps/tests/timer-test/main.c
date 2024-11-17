@@ -1,33 +1,23 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
-#include <sys/time.h>
+#include <NDL.h>
 
 int main()
 {
 
-	unsigned long old = 0;
-	struct timeval tv;
-
-	if (gettimeofday(&tv, NULL) == 0)
+	uint32_t old = 0, new = 0, flags = 0;
+	NDL_Init(flags);
+	old = NDL_GetTicks();
+	while (1)
 	{
-		old = tv.tv_usec;
-		while (1)
+		new = NDL_GetTicks();
+		if (new - old > 500)
 		{
-			if (gettimeofday(&tv, NULL) == 0)
-			{
-				if (tv.tv_usec - old > 500000)
-				{
-					printf("Gettimeofday Success!\n");
-					old = tv.tv_usec;
-				}
-			}
-			else
-				printf("Gettimeofday Error!\n");
+			printf("Gettimeofday Success!\n");
+			old = new;
 		}
 	}
-	else
-		printf("Gettimeofday Error!\n");
-
+	NDL_Quit();
 	return 0;
 }
