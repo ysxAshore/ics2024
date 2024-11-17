@@ -1,4 +1,5 @@
 #include <common.h>
+#include <sys/time.h>
 #include "syscall.h"
 
 int fs_open(const char *pathname, int flags, int mode);
@@ -7,6 +8,8 @@ size_t fs_write(int fd, const void *buf, size_t len);
 int fs_close(int fd);
 size_t fs_lseek(int fd, size_t offset, int whence);
 char *getFdName(int fd);
+
+int time_gettimeofday(struct timeval *tv, struct timezone *tz);
 
 void do_syscall(Context *c)
 {
@@ -76,6 +79,14 @@ void do_syscall(Context *c)
     Log("Thers is a SYS_brk syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, 0);
 #endif
     c->GPRx = 0;
+    break;
+
+  case SYS_gettimeofday:
+    result = time_gettimeofday((struct timeval *)c->GPR2, (struct timezone *)c->GPR3);
+#ifdef CONFIG_STRACE
+    Log("Thers is a SYS_gettimeofday syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, 0);
+#endif
+    c->GPRx = result;
     break;
 
   default:
