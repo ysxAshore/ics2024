@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <assert.h>
 
+static uint32_t init_time = 0;
 static int evtdev = -1; // NWM_APP的/dev/events　ID
 static int fbdev = -1;  // NWM_APP的/dev/fb　ID
 static int screen_w = 0, screen_h = 0;
@@ -18,7 +19,7 @@ uint32_t NDL_GetTicks()
   struct timeval tv;
   int result = gettimeofday(&tv, NULL);
   assert(result == 0);
-  return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+  return tv.tv_sec * 1000 + tv.tv_usec / 1000 - init_time;
 }
 
 int NDL_PollEvent(char *buf, int len)
@@ -82,22 +83,30 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h)
   }
 }
 
+// 打开音频功能,初始化声卡设备
 void NDL_OpenAudio(int freq, int channels, int samples)
 {
+  int buf[] = {freq, channels, samples};
+  write(6, (void *)buf, 12);
 }
 
+// 关闭音频功能
 void NDL_CloseAudio()
 {
 }
 
+// 播放缓冲区buf中长度为len的音频数据,返回成功播放的音频数据字节数
 int NDL_PlayAudio(void *buf, int len)
 {
-  return 0;
+  return write(7, buf, len);
 }
 
+// 返回当前声卡设备流缓冲区中的空闲字节数
 int NDL_QueryAudio()
 {
-  return 0;
+  int curSize = 0;
+  read(6, (void *)&curSize, 4);
+  return curSize;
 }
 
 int strFindChar(char *s, char c)
@@ -116,6 +125,13 @@ int NDL_Init(uint32_t flags)
     evtdev = 3;
     fbdev = 5;
   }
+  // 由于gettimeofday获取的时间实际上是AM_TIMER_UPTIME寄存器里的时间，此时间代表的是系统开机后的时间
+  // 所以需要在NDL_init中先初始化一下第一次获取的时间，之后用每次获取的时间减去开始时间来获取启动NDL库之后的当前时间
+  struct timeval tv;
+  int result = gettimeofday(&tv, NULL);
+  assert(result == 0);
+  init_time = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+
   char buf[64], res[64];
   read(4, buf, 64);
   int first_newline = strFindChar(buf, '\n');

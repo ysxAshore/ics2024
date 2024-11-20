@@ -64,6 +64,37 @@ size_t fb_write(const void *buf, size_t offset, size_t len)
   return len;
 }
 
+// 读出可用大小
+size_t sbctl_read(void *buf, size_t offset, size_t len)
+{
+  int hasUsed_size = io_read(AM_AUDIO_STATUS).count;
+  int entire_size = io_read(AM_AUDIO_CONFIG).bufsize;
+  return snprintf((char *)buf, len, "%d", entire_size - hasUsed_size);
+}
+
+size_t sbctl_write(const void *buf, size_t offset, size_t len)
+{
+  int freq = ((int *)buf)[0];
+  int channel = ((int *)buf)[1];
+  int samples = ((int *)buf)[2];
+  io_write(AM_AUDIO_CTRL, freq, channel, samples);
+  return len;
+}
+
+size_t sb_write(const void *buf, size_t offset, size_t len)
+{
+  int curSize; // 声明可用大小
+  do
+  {
+    sbctl_read(&curSize, 0, 4); // 读取可用大小
+  } while (curSize >= len); // 直到可用大小够写当前的len长的buf数据
+  Area sbuf;
+  sbuf.start = (void *)buf;
+  sbuf.end = sbuf.start + len;
+  io_write(AM_AUDIO_PLAY, sbuf);
+  return len;
+}
+
 int time_gettimeofday(struct timeval *tv, struct timezone *tz)
 {
   // tz可以忽略,设置为NULL
