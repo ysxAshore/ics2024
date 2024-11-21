@@ -181,6 +181,29 @@ typedef __uint128_t fixedptud;
 			fract = 0;
 		return (fixedpt)(sign * fract);
 	}
+	static inline uint32_t fixedpt2float(fixedpt value)
+	{
+		if (value == 0)
+			return 0;
+
+		uint32_t sign = (value & 0x80000000) ? 1 : 0;	   // 提取符号位
+		uint32_t abs_value = (value < 0) ? -value : value; // 计算绝对值
+
+		// 寻找最高有效位
+		int shift = 0;
+		while ((abs_value & 0x80000000) == 0)
+		{
+			abs_value <<= 1;
+			shift++;
+		}
+
+		// 计算指数
+		int32_t expNum = 127 + (31 - shift - FIXEDPT_FBITS); // 偏移指数
+
+		// 去掉隐含位，并移到尾数位的位置
+		uint32_t fract = (abs_value & 0x7FFFFFFF) >> 8;
+		return (sign << 31) | (expNum << 23) | (fract & 0x7FFFFF);
+	}
 	/*
 	 * Note: adding and substracting fixedpt numbers can be done by using
 	 * the regular integer operators + and -.
