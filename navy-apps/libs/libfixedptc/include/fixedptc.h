@@ -198,9 +198,9 @@ typedef __uint128_t fixedptud;
 		}
 
 		// 计算指数
-		int32_t expNum = 127 + (31 - shift - FIXEDPT_FBITS); // 偏移指数
+		int32_t expNum = 127 + (31 - shift - FIXEDPT_FBITS); // 31位是去除隐含位, 31-shift得到最高有效位原始位置　为什么再减去FIXEDPT_FBITS是因为这个尾数是已经右移８了的
 
-		// 去掉隐含位，并移到尾数位的位置
+		// 去掉隐含位，并移到低23位
 		uint32_t fract = (abs_value & 0x7FFFFFFF) >> 8;
 		return (sign << 31) | (expNum << 23) | (fract & 0x7FFFFF);
 	}

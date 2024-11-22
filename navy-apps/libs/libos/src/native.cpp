@@ -15,7 +15,7 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
-//#define MODE_800x600
+// #define MODE_800x600
 
 #define FPS 60
 #define WINDOW_W 800
@@ -49,60 +49,74 @@ static int sbctl_fd = -1;
 static uint32_t *fb = NULL;
 static char fsimg_path[512] = "";
 
-static inline void get_fsimg_path(char *newpath, const char *path) {
+static inline void get_fsimg_path(char *newpath, const char *path)
+{
   sprintf(newpath, "%s%s", fsimg_path, path);
 }
 
-#define _KEYS(_) \
-  _(ESCAPE) _(F1) _(F2) _(F3) _(F4) _(F5) _(F6) _(F7) _(F8) _(F9) _(F10) _(F11) _(F12) \
-  _(GRAVE) _(1) _(2) _(3) _(4) _(5) _(6) _(7) _(8) _(9) _(0) _(MINUS) _(EQUALS) _(BACKSPACE) \
-  _(TAB) _(Q) _(W) _(E) _(R) _(T) _(Y) _(U) _(I) _(O) _(P) _(LEFTBRACKET) _(RIGHTBRACKET) _(BACKSLASH) \
-  _(CAPSLOCK) _(A) _(S) _(D) _(F) _(G) _(H) _(J) _(K) _(L) _(SEMICOLON) _(APOSTROPHE) _(RETURN) \
-  _(LSHIFT) _(Z) _(X) _(C) _(V) _(B) _(N) _(M) _(COMMA) _(PERIOD) _(SLASH) _(RSHIFT) \
-  _(LCTRL) _(APPLICATION) _(LALT) _(SPACE) _(RALT) _(RCTRL) \
-  _(UP) _(DOWN) _(LEFT) _(RIGHT) _(INSERT) _(DELETE) _(HOME) _(END) _(PAGEUP) _(PAGEDOWN)
+#define _KEYS(_)                                                                                               \
+  _(ESCAPE)                                                                                                    \
+  _(F1)                                                                                                        \
+  _(F2) _(F3) _(F4) _(F5) _(F6) _(F7) _(F8) _(F9) _(F10) _(F11) _(F12)                                         \
+      _(GRAVE) _(1) _(2) _(3) _(4) _(5) _(6) _(7) _(8) _(9) _(0) _(MINUS) _(EQUALS) _(BACKSPACE)               \
+          _(TAB) _(Q) _(W) _(E) _(R) _(T) _(Y) _(U) _(I) _(O) _(P) _(LEFTBRACKET) _(RIGHTBRACKET) _(BACKSLASH) \
+              _(CAPSLOCK) _(A) _(S) _(D) _(F) _(G) _(H) _(J) _(K) _(L) _(SEMICOLON) _(APOSTROPHE) _(RETURN)    \
+                  _(LSHIFT) _(Z) _(X) _(C) _(V) _(B) _(N) _(M) _(COMMA) _(PERIOD) _(SLASH) _(RSHIFT)           \
+                      _(LCTRL) _(APPLICATION) _(LALT) _(SPACE) _(RALT) _(RCTRL)                                \
+                          _(UP) _(DOWN) _(LEFT) _(RIGHT) _(INSERT) _(DELETE) _(HOME) _(END) _(PAGEUP) _(PAGEDOWN)
 
-#define COND(k) \
-  if (scancode == SDL_SCANCODE_##k) name = #k;
+#define COND(k)                     \
+  if (scancode == SDL_SCANCODE_##k) \
+    name = #k;
 
 #define KEY_QUEUE_LEN 64
 static SDL_Event key_queue[KEY_QUEUE_LEN] = {};
 static int key_f = 0, key_r = 0;
 static SDL_mutex *key_queue_lock = NULL;
 
-static int event_thread(void *args) {
+static int event_thread(void *args)
+{
   SDL_Event event;
-  while (1) {
+  while (1)
+  {
     SDL_WaitEvent(&event);
 
-    switch (event.type) {
-      case SDL_QUIT: exit(0); break;
-      case SDL_KEYDOWN:
-      case SDL_KEYUP:
-        SDL_LockMutex(key_queue_lock);
-        key_queue[key_r] = event;
-        key_r = (key_r + 1) % KEY_QUEUE_LEN;
-        assert(key_r != key_f);
-        SDL_UnlockMutex(key_queue_lock);
-        break;
+    switch (event.type)
+    {
+    case SDL_QUIT:
+      exit(0);
+      break;
+    case SDL_KEYDOWN:
+    case SDL_KEYUP:
+      SDL_LockMutex(key_queue_lock);
+      key_queue[key_r] = event;
+      key_r = (key_r + 1) % KEY_QUEUE_LEN;
+      assert(key_r != key_f);
+      SDL_UnlockMutex(key_queue_lock);
+      break;
     }
   }
   return 0;
 }
 
-static Uint32 texture_sync(Uint32 interval, void *param) {
+static Uint32 texture_sync(Uint32 interval, void *param)
+{
   SDL_BlitScaled(surface, NULL, SDL_GetWindowSurface(window), NULL);
   SDL_UpdateWindowSurface(window);
   return interval;
 }
 
-static void audio_fill(void *userdata, uint8_t *stream, int len) {
+static void audio_fill(void *userdata, uint8_t *stream, int len)
+{
   int nread = glibc_read(sb_fifo[0], stream, len);
-  if (nread == -1) nread = 0;
-  if (nread < len) memset(stream + nread, 0, len - nread);
+  if (nread == -1)
+    nread = 0;
+  if (nread < len)
+    memset(stream + nread, 0, len - nread);
 }
 
-static void open_display() {
+static void open_display()
+{
   fb_memfd = memfd_create("fb", 0);
   assert(fb_memfd != -1);
   int ret = ftruncate(fb_memfd, FB_SIZE);
@@ -114,28 +128,32 @@ static void open_display() {
 
   SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
   window = SDL_CreateWindow("Simulated Nanos Application",
-      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_W, WINDOW_H, SDL_WINDOW_OPENGL);
+                            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_W, WINDOW_H, SDL_WINDOW_OPENGL);
   surface = SDL_CreateRGBSurfaceFrom(fb, disp_w, disp_h, 32, disp_w * sizeof(uint32_t),
-      RMASK, GMASK, BMASK, AMASK);
+                                     RMASK, GMASK, BMASK, AMASK);
   SDL_CreateThread(event_thread, "event thread", nullptr);
   SDL_AddTimer(1000 / FPS, texture_sync, NULL);
 }
 
-static void open_event() {
+static void open_event()
+{
   key_queue_lock = SDL_CreateMutex();
   evt_fd = dup(dummy_fd);
 }
 
-static void open_audio() {
+static void open_audio()
+{
   int ret = pipe2(sb_fifo, O_NONBLOCK);
   assert(ret == 0);
   sbctl_fd = dup(dummy_fd);
   pipe_size = fcntl(sb_fifo[0], F_GETPIPE_SZ);
 }
 
-static const char* redirect_path(char *newpath, const char *path) {
+static const char *redirect_path(char *newpath, const char *path)
+{
   get_fsimg_path(newpath, path);
-  if (0 == access(newpath, 0)) {
+  if (0 == access(newpath, 0))
+  {
     fprintf(stderr, "Redirecting file open: %s -> %s\n", path, newpath);
     return newpath;
   }
@@ -148,59 +166,82 @@ extern "C" ssize_t read(int fd, void *buf, size_t count);
 extern "C" ssize_t write(int fd, const void *buf, size_t count);
 extern "C" int execve(const char *filename, char *const argv[], char *const envp[]);
 
-FILE *fopen(const char *path, const char *mode) {
+FILE *fopen(const char *path, const char *mode)
+{
   char newpath[512];
-  if (glibc_fopen == NULL) {
-    glibc_fopen = (FILE*(*)(const char*, const char*))dlsym(RTLD_NEXT, "fopen");
+  if (glibc_fopen == NULL)
+  {
+    glibc_fopen = (FILE * (*)(const char *, const char *)) dlsym(RTLD_NEXT, "fopen");
     assert(glibc_fopen != NULL);
   }
   return glibc_fopen(redirect_path(newpath, path), mode);
 }
 
-int open(const char *path, int flags, ...) {
-  if (strcmp(path, "/proc/dispinfo") == 0) {
+int open(const char *path, int flags, ...)
+{
+  if (strcmp(path, "/proc/dispinfo") == 0)
+  {
     return dispinfo_fd;
-  } else if (strcmp(path, "/dev/events") == 0) {
+  }
+  else if (strcmp(path, "/dev/events") == 0)
+  {
     return evt_fd;
-  } else if (strcmp(path, "/dev/fb") == 0) {
+  }
+  else if (strcmp(path, "/dev/fb") == 0)
+  {
     return fb_memfd;
-  } else if (strcmp(path, "/dev/sb") == 0) {
+  }
+  else if (strcmp(path, "/dev/sb") == 0)
+  {
     return sb_fifo[1];
-  } else if (strcmp(path, "/dev/sbctl") == 0) {
+  }
+  else if (strcmp(path, "/dev/sbctl") == 0)
+  {
     return sbctl_fd;
-  } else {
+  }
+  else
+  {
     char newpath[512];
     return glibc_open(redirect_path(newpath, path), flags);
   }
 }
 
-ssize_t read(int fd, void *buf, size_t count) {
-  if (fd == dispinfo_fd) {
+ssize_t read(int fd, void *buf, size_t count)
+{
+  if (fd == dispinfo_fd)
+  {
     // This does not strictly conform to `navy-apps/README.md`.
     // But it should be enough for real usage. Modify it if necessary.
     return snprintf((char *)buf, count, "WIDTH: %d\nHEIGHT: %d\n", disp_w, disp_h);
-  } else if (fd == evt_fd) {
+  }
+  else if (fd == evt_fd)
+  {
     int has_key = 0;
     SDL_Event ev = {};
     SDL_LockMutex(key_queue_lock);
-    if (key_f != key_r) {
+    if (key_f != key_r)
+    {
       ev = key_queue[key_f];
       key_f = (key_f + 1) % KEY_QUEUE_LEN;
       has_key = 1;
     }
     SDL_UnlockMutex(key_queue_lock);
 
-    if (has_key) {
+    if (has_key)
+    {
       SDL_Keysym k = ev.key.keysym;
       int keydown = ev.key.type == SDL_KEYDOWN;
       int scancode = k.scancode;
 
       const char *name = NULL;
       _KEYS(COND);
-      if (name) return snprintf((char *)buf, count, "k%c %s\n", keydown ? 'd' : 'u', name);
+      if (name)
+        return snprintf((char *)buf, count, "k%c %s\n", keydown ? 'd' : 'u', name);
     }
     return 0;
-  } else if (fd == sbctl_fd) {
+  }
+  else if (fd == sbctl_fd)
+  {
     // return the free space of sb_fifo
     int used;
     ioctl(sb_fifo[0], FIONREAD, &used);
@@ -210,8 +251,10 @@ ssize_t read(int fd, void *buf, size_t count) {
   return glibc_read(fd, buf, count);
 }
 
-ssize_t write(int fd, const void *buf, size_t count) {
-  if (fd == sbctl_fd) {
+ssize_t write(int fd, const void *buf, size_t count)
+{
+  if (fd == sbctl_fd)
+  {
     // open audio
     const int *args = (const int *)buf;
     assert(count >= sizeof(int) * 3);
@@ -229,23 +272,26 @@ ssize_t write(int fd, const void *buf, size_t count) {
   return glibc_write(fd, buf, count);
 }
 
-int execve(const char *filename, char *const argv[], char *const envp[]) {
+int execve(const char *filename, char *const argv[], char *const envp[])
+{
   char newpath[512];
   glibc_execve(redirect_path(newpath, filename), argv, envp);
   return -1;
 }
 
-struct Init {
-  Init() {
-    glibc_fopen = (FILE*(*)(const char*, const char*))dlsym(RTLD_NEXT, "fopen");
+struct Init
+{
+  Init()
+  {
+    glibc_fopen = (FILE * (*)(const char *, const char *)) dlsym(RTLD_NEXT, "fopen");
     assert(glibc_fopen != NULL);
-    glibc_open = (int(*)(const char*, int, ...))dlsym(RTLD_NEXT, "open");
+    glibc_open = (int (*)(const char *, int, ...))dlsym(RTLD_NEXT, "open");
     assert(glibc_open != NULL);
-    glibc_read = (ssize_t (*)(int fd, void *buf, size_t count))dlsym(RTLD_NEXT, "read");
+    glibc_read = (ssize_t(*)(int fd, void *buf, size_t count))dlsym(RTLD_NEXT, "read");
     assert(glibc_read != NULL);
-    glibc_write = (ssize_t (*)(int fd, const void *buf, size_t count))dlsym(RTLD_NEXT, "write");
+    glibc_write = (ssize_t(*)(int fd, const void *buf, size_t count))dlsym(RTLD_NEXT, "write");
     assert(glibc_write != NULL);
-    glibc_execve = (int(*)(const char*, char *const [], char *const []))dlsym(RTLD_NEXT, "execve");
+    glibc_execve = (int (*)(const char *, char *const[], char *const[]))dlsym(RTLD_NEXT, "execve");
     assert(glibc_execve != NULL);
 
     dummy_fd = memfd_create("dummy", 0);
@@ -261,13 +307,15 @@ struct Init {
     setenv("PATH", newpath, 1); // overwrite the current PATH
 
     SDL_Init(0);
-    if (!getenv("NWM_APP")) {
+    if (!getenv("NWM_APP"))
+    {
       open_display();
       open_event();
     }
     open_audio();
   }
-  ~Init() {
+  ~Init()
+  {
   }
 };
 

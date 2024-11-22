@@ -24,7 +24,10 @@ uint32_t NDL_GetTicks()
 
 int NDL_PollEvent(char *buf, int len)
 {
-  return read(3, buf, len);
+  int fd = open("/dev/events", 0);
+  int result = read(3, buf, len);
+  close(fd);
+  return result;
 }
 
 void NDL_OpenCanvas(int *w, int *h)
@@ -49,6 +52,7 @@ void NDL_OpenCanvas(int *w, int *h)
       if (strcmp(buf, "mmap ok") == 0)
         break;
     }
+    printf("111");
     close(fbctl);
   }
   if (*w == 0 && *h == 0) // 如果*w和*h均为0, 则将系统全屏幕作为画布, 并将*w和*h分别设为系统屏幕的大小
@@ -74,20 +78,26 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h)
   int curScreen_y = y + canvas_y;
 
   int offset = curScreen_y * screen_w + curScreen_x;
+
+  int fd = open("/dev/fb", 0);
+
   for (int i = 0; i < h && i + y < canvas_h; i++) // 不要超出画布高度
   {
-    lseek(5, offset, SEEK_SET);               //
+    lseek(fd, offset * 4, SEEK_SET);          //
     w = w <= canvas_w - x ? w : canvas_w - x; // 画布的宽度是否够画
-    write(5, pixels + i * w, w);
+    write(fd, pixels + i * w, w * 4);
     offset = offset + screen_w; // 更新offset
   }
+  close(fd);
 }
 
 // 打开音频功能,初始化声卡设备
 void NDL_OpenAudio(int freq, int channels, int samples)
 {
+  int fd = open("/dev/sbctl", 0);
   int buf[] = {freq, channels, samples};
-  write(6, (void *)buf, 12);
+  write(fd, (void *)buf, 12);
+  close(fd);
 }
 
 // 关闭音频功能
@@ -98,14 +108,19 @@ void NDL_CloseAudio()
 // 播放缓冲区buf中长度为len的音频数据,返回成功播放的音频数据字节数
 int NDL_PlayAudio(void *buf, int len)
 {
-  return write(7, buf, len);
+  int fd = open("/dev/sb", 0);
+  int result = write(fd, buf, len);
+  close(fd);
+  return result;
 }
 
 // 返回当前声卡设备流缓冲区中的空闲字节数
 int NDL_QueryAudio()
 {
   int curSize = 0;
-  read(6, (void *)&curSize, 4);
+  int fd = open("/dev/sbctl", 0);
+  read(fd, (void *)&curSize, 4);
+  close(fd);
   return curSize;
 }
 
