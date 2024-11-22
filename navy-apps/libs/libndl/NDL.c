@@ -25,7 +25,7 @@ uint32_t NDL_GetTicks()
 int NDL_PollEvent(char *buf, int len)
 {
   int fd = open("/dev/events", 0);
-  int result = read(3, buf, len);
+  int result = read(fd, buf, len);
   close(fd);
   return result;
 }
@@ -74,6 +74,7 @@ void NDL_OpenCanvas(int *w, int *h)
 
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h)
 {
+  // x y w h都是以像素为单位
   int curScreen_x = x + canvas_x;
   int curScreen_y = y + canvas_y;
 
@@ -83,7 +84,7 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h)
 
   for (int i = 0; i < h && i + y < canvas_h; i++) // 不要超出画布高度
   {
-    lseek(fd, offset * 4, SEEK_SET);          //
+    lseek(fd, offset * 4, SEEK_SET);          // 　是字节为单位
     w = w <= canvas_w - x ? w : canvas_w - x; // 画布的宽度是否够画
     write(fd, pixels + i * w, w * 4);
     offset = offset + screen_w; // 更新offset

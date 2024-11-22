@@ -8,6 +8,27 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
 {
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
+  if (srcrect && dstrect)
+  {
+    dstrect->x = srcrect->x;
+    dstrect->y = srcrect->y;
+    dstrect->w = srcrect->w;
+    dstrect->h = srcrect->h;
+    for (int i = 0; i < srcrect->h; ++i)
+    {
+      memcpy(dst->pixels + (dstrect->y + i) * dst->w + dstrect->x,
+             src->pixels + (srcrect->y + i) * src->w + srcrect->x,
+             dstrect->w * 4); // memcpy上以字节为单位
+    }
+  }
+  else
+  {
+    dst->w = src->w;
+    dst->h = src->h;
+    memcpy(dst->pixels, src->pixels, src->w * src->h * 4);
+    uint32_t *sp = (uint32_t *)src->pixels;
+    uint32_t *dp = (uint32_t *)dst->pixels;
+  }
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color)
@@ -16,6 +37,17 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color)
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h)
 {
+  if (w == 0 && h == 0)
+  { // 未指定时设置为全屏
+    w = s->w;
+    h = s->h;
+  }
+  uint32_t *pixels = malloc(w * h * 4);
+  uint32_t *src = (uint32_t *)s->pixels; // 后续的指针运算应该是基于32位指针
+  for (int i = 0; i < h; i++)
+    memcpy(pixels + i * w, src + (y + i) * s->w + x, w * 4); // s->pixels记录的是整个表面的像素值
+  NDL_DrawRect(pixels, x, y, w, h);
+  free(pixels);
 }
 
 // APIs below are already implemented.
