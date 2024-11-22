@@ -3,36 +3,46 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)
 {
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
-  if (srcrect && dstrect)
+  int w = src->w, h = src->h;
+  int sx = 0, sy = 0, dx = 0, dy = 0;
+  if (srcrect)
   {
-    dstrect->x = srcrect->x;
-    dstrect->y = srcrect->y;
-    dstrect->w = srcrect->w;
-    dstrect->h = srcrect->h;
-    for (int i = 0; i < srcrect->h; ++i)
-    {
-      memcpy(dst->pixels + (dstrect->y + i) * dst->w + dstrect->x,
-             src->pixels + (srcrect->y + i) * src->w + srcrect->x,
-             dstrect->w * 4); // memcpy上以字节为单位
-    }
+    w = srcrect->w;
+    h = srcrect->h;
+    sx = srcrect->x;
+    sy = srcrect->y;
   }
-  else
+  if (dstrect)
   {
-    dst->w = src->w;
-    dst->h = src->h;
-    memcpy(dst->pixels, src->pixels, src->w * src->h * 4);
-    uint32_t *sp = (uint32_t *)src->pixels;
-    uint32_t *dp = (uint32_t *)dst->pixels;
+    dx = dstrect->x;
+    dy = dstrect->y;
   }
+  uint32_t *sp = (uint32_t *)src->pixels; // 后续的指针运算应该是基于32位指针
+  uint32_t *dp = (uint32_t *)dst->pixels;
+  for (int i = 0; i < h; ++i)
+    memcpy(dp + (dy + i) * dst->w + dx, sp + (sy + i) * src->w + sx, w * 4);
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color)
 {
+  int w = dst->w, h = dst->h, x = 0, y = 0;
+  if (dstrect)
+  {
+    w = dstrect->w;
+    h = dstrect->h;
+    x = dstrect->x;
+    y = dstrect->y;
+  }
+  uint32_t *pixels = (uint32_t *)dst->pixels; // 后续的指针运算应该是基于32位指针
+  for (int i = 0; i < h; ++i)
+    for (int j = 0; j < w; ++j)
+      pixels[(y + i) * dst->w + x + j] = color;
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h)
