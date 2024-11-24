@@ -5,6 +5,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+// notice the src->format->palette中的SDL_Color数组虽然是Union,但是不能直接使用val值,因为它的val是rgba
+// 实际图像应该是argb 在绘画时SDL_UpdateRect调用即可
+uint32_t convertColor(SDL_Color a)
+{
+  return a.a << 24 | a.r << 16 | a.g << 8 | a.b;
+}
+uint32_t decodeColor(uint32_t color)
+{
+  uint8_t a = (color & 0xFF000000) >> 24;
+  uint8_t r = (color & 0x00FF0000) >> 16;
+  uint8_t g = (color & 0x0000FF00) >> 8;
+  uint8_t b = (color & 0x000000FF);
+  return r << 24 | g << 16 | b << 8 | a;
+}
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)
 {
   assert(dst && src);
@@ -23,10 +37,25 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
     dx = dstrect->x;
     dy = dstrect->y;
   }
-  uint32_t *sp = (uint32_t *)src->pixels; // 后续的指针运算应该是基于32位指针
-  uint32_t *dp = (uint32_t *)dst->pixels;
-  for (int i = 0; i < h; ++i)
-    memcpy(dp + (dy + i) * dst->w + dx, sp + (sy + i) * src->w + sx, w * 4);
+  // 分别处理32位色素和8位色素
+  if (dst->format->BitsPerPixel == 32)
+  {
+    uint32_t *sp = (uint32_t *)src->pixels; // 后续的指针运算应该是基于32位指针
+    uint32_t *dp = (uint32_t *)dst->pixels;
+    for (int i = 0; i < h; ++i)
+      memcpy(dp + (dy + i) * dst->w + dx, sp + (sy + i) * src->w + sx, w * 4);
+  }
+  else if (dst->format->BitsPerPixel == 8)
+  {
+    uint8_t *sp = (uint8_t *)src->pixels; // 后续的指针运算应该是基于32位指针
+    uint8_t *dp = (uint8_t *)dst->pixels;
+    for (int i = 0; i < h; ++i)
+      for (int j = 0; j < w; ++j)
+      {
+        dp[(dy + i) * dst->w + dx + j] = sp[(sy + i) * src->w + sx + j];
+        dst->format->palette->colors[dp[(dy + i) * dst->w + dx + j]].val = src->format->palette->colors[sp[(sy + i) * src->w + sx + j]].val;
+      }
+  }
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color)
@@ -39,10 +68,21 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color)
     x = dstrect->x;
     y = dstrect->y;
   }
-  uint32_t *pixels = (uint32_t *)dst->pixels; // 后续的指针运算应该是基于32位指针
-  for (int i = 0; i < h; ++i)
-    for (int j = 0; j < w; ++j)
-      pixels[(y + i) * dst->w + x + j] = color;
+  if (dst->format->BitsPerPixel == 32)
+  {
+    uint32_t *pixels = (uint32_t *)dst->pixels; // 后续的指针运算应该是基于32位指针
+    for (int i = 0; i < h; ++i)
+      for (int j = 0; j < w; ++j)
+        pixels[(y + i) * dst->w + x + j] = color;
+  }
+  else if (dst->format->BitsPerPixel == 8)
+  {
+    SDL_Color *colors = dst->format->palette->colors;
+    uint8_t *pixels = (uint8_t *)dst->pixels;
+    for (int i = 0; i < h; ++i)
+      for (int j = 0; j < w; ++j)
+        colors[pixels[(y + i) * dst->w + x + j]].val = decodeColor(color);
+  }
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h)
@@ -53,9 +93,19 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h)
     h = s->h;
   }
   uint32_t *pixels = malloc(w * h * 4);
-  uint32_t *src = (uint32_t *)s->pixels; // 后续的指针运算应该是基于32位指针
-  for (int i = 0; i < h; i++)
-    memcpy(pixels + i * w, src + (y + i) * s->w + x, w * 4); // s->pixels记录的是整个表面的像素值
+  if (s->format->BitsPerPixel == 32)
+  {
+    uint32_t *src = (uint32_t *)s->pixels; // 后续的指针运算应该是基于32位指针
+    for (int i = 0; i < h; ++i)
+      memcpy(pixels + i * w, src + (y + i) * s->w + x, w * 4); // s->pixels记录的是整个表面的像素值
+  }
+  else
+  {
+    uint8_t *src = (uint8_t *)s->pixels;
+    for (int i = 0; i < h; ++i)
+      for (int j = 0; j < w; ++j)
+        pixels[i * w + j] = convertColor(s->format->palette->colors[src[(y + i) * s->w + x + j]]);
+  }
   NDL_DrawRect(pixels, x, y, w, h);
   free(pixels);
 }
