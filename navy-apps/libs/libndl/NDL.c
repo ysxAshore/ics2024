@@ -52,7 +52,6 @@ void NDL_OpenCanvas(int *w, int *h)
       if (strcmp(buf, "mmap ok") == 0)
         break;
     }
-    printf("111");
     close(fbctl);
   }
   if (*w == 0 && *h == 0) // 如果*w和*h均为0, 则将系统全屏幕作为画布, 并将*w和*h分别设为系统屏幕的大小
