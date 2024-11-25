@@ -1,4 +1,5 @@
 #include <common.h>
+#include <proc.h>
 #include <sys/time.h>
 #include "syscall.h"
 
@@ -8,6 +9,7 @@ size_t fs_write(int fd, const void *buf, size_t len);
 int fs_close(int fd);
 size_t fs_lseek(int fd, size_t offset, int whence);
 char *getFdName(int fd);
+void naive_uload(PCB *pcb, const char *filename);
 
 int time_gettimeofday(struct timeval *tv, struct timezone *tz);
 
@@ -23,7 +25,7 @@ void do_syscall(Context *c)
     Log("Thers is a SYS_exit syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, 0);
 #endif
     c->GPRx = 0;
-    halt(c->GPR2);
+    naive_uload(NULL, "/bin/menu");
     break;
 
   case SYS_yield: // SYS_yield　syscall
@@ -81,6 +83,13 @@ void do_syscall(Context *c)
     c->GPRx = 0;
     break;
 
+  case SYS_execve:
+#ifdef CONFIG_STRACE
+    Log("Thers is a SYS_execve syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, 0);
+#endif
+    naive_uload(NULL, (const char *)c->GPR2);
+    c->GPRx = 0;
+    break;
   case SYS_gettimeofday:
     result = time_gettimeofday((struct timeval *)c->GPR2, (struct timezone *)c->GPR3);
 #ifdef CONFIG_STRACE
