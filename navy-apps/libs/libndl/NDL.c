@@ -117,7 +117,7 @@ int NDL_PlayAudio(void *buf, int len)
 // 返回当前声卡设备流缓冲区中的空闲字节数
 int NDL_QueryAudio()
 {
-  int curSize = 0;
+  uint32_t curSize = 0;
   int fd = open("/dev/sbctl", 0);
   read(fd, (void *)&curSize, 4);
   close(fd);

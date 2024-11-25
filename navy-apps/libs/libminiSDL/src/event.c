@@ -32,7 +32,7 @@ int SDL_PollEvent(SDL_Event *event)
     // keySym.sym = atoi(intNum);
     for (int i = 0; i < SIZE; ++i)
     {
-      if (strcmp(keyname[i], buf + 3) == 0)
+      if (keyname[i] && strcmp(keyname[i], buf + 3) == 0)
       {
         keySym.sym = i;
         break;
@@ -45,8 +45,10 @@ int SDL_PollEvent(SDL_Event *event)
       isKeyDown[keySym.sym] = (uint8_t)1;
     else
       isKeyDown[keySym.sym] = (uint8_t)0;
+    CallbackHelper(2); // 先响应按键，不然会按动卡卡的
     return 1;
   }
+  CallbackHelper(2);
   return 0;
 }
 

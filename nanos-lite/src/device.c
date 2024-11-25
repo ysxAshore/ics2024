@@ -69,7 +69,8 @@ size_t sbctl_read(void *buf, size_t offset, size_t len)
 {
   int hasUsed_size = io_read(AM_AUDIO_STATUS).count;
   int entire_size = io_read(AM_AUDIO_CONFIG).bufsize;
-  return snprintf((char *)buf, len, "%d", entire_size - hasUsed_size);
+  *((uint32_t *)buf) = entire_size - hasUsed_size;
+  return len;
 }
 
 size_t sbctl_write(const void *buf, size_t offset, size_t len)
@@ -83,11 +84,11 @@ size_t sbctl_write(const void *buf, size_t offset, size_t len)
 
 size_t sb_write(const void *buf, size_t offset, size_t len)
 {
-  int curSize; // 声明可用大小
+  uint32_t curSize; // 声明可用大小
   do
   {
     sbctl_read(&curSize, 0, 4); // 读取可用大小
-  } while (curSize >= len); // 直到可用大小够写当前的len长的buf数据
+  } while (curSize < len); // 直到可用大小够写当前的len长的buf数据
   Area sbuf;
   sbuf.start = (void *)buf;
   sbuf.end = sbuf.start + len;

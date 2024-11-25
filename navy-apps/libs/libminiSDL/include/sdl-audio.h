@@ -1,7 +1,8 @@
 #ifndef __SDL_AUDIO_H__
 #define __SDL_AUDIO_H__
 
-typedef struct {
+typedef struct
+{
   int freq;
   uint16_t format;
   uint8_t channels;
@@ -15,8 +16,9 @@ typedef struct {
 #define AUDIO_S16 16
 #define AUDIO_S16SYS AUDIO_S16
 
-#define SDL_MIX_MAXVOLUME  128
+#define SDL_MIX_MAXVOLUME 128
 
+void CallbackHelper(int flags);
 int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained);
 void SDL_CloseAudio();
 void SDL_PauseAudio(int pause_on);

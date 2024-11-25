@@ -53,7 +53,8 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
       for (int j = 0; j < w; ++j)
       {
         dp[(dy + i) * dst->w + dx + j] = sp[(sy + i) * src->w + sx + j];
-        dst->format->palette->colors[dp[(dy + i) * dst->w + dx + j]].val = src->format->palette->colors[sp[(sy + i) * src->w + sx + j]].val;
+        // why ?
+        // dst->format->palette->colors[dp[(dy + i) * dst->w + dx + j]].val = src->format->palette->colors[sp[(sy + i) * src->w + sx + j]].val;
       }
   }
 }
