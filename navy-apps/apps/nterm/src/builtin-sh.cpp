@@ -46,7 +46,25 @@ static struct
 
 };
 
+static const char *program_table[] = {
+    "nslider",
+    "bmp-test",
+    "dhrystone",
+    "file-test",
+    "coremark",
+    "fixedptc-test",
+    "dummy",
+    "hello",
+    "typing-game",
+    "cpp-test",
+    "bird",
+    "event-test",
+    "menu",
+    "nterm",
+    "pal",
+    "timer-test"};
 #define NR_CMD (int)(sizeof(cmd_table) / sizeof(cmd_table[0]))
+#define PM_CMD (int)(sizeof(program_table) / sizeof(program_table[0]))
 
 static int cmd_help(char *args)
 {
@@ -75,6 +93,14 @@ static int cmd_help(char *args)
     }
     sh_printf("Unknown command '%s'\n", arg);
   }
+  return 0;
+}
+
+static int cmd_execve(char *args)
+{
+  setenv("PATH", "/bin", 0);
+  if (execvp(args, NULL) == -1) // execvp failed return -1
+    return -1;
   return 0;
 }
 
@@ -148,9 +174,15 @@ static void sh_handle_cmd(const char *cmd)
         return;
       }
     }
-
-    if (i == NR_CMD)
-      sh_printf("Unknown command %s\n", sub_cmd);
+    for (i = 0; i < PM_CMD; ++i)
+    {
+      if (strcmp(sub_cmd, program_table[i]) == 0)
+      {
+        cmd_execve(sub_cmd);
+        return;
+      }
+    }
+    sh_printf("Unknown command '%s'\n", sub_cmd);
   }
 }
 

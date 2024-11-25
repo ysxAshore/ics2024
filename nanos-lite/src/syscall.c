@@ -25,7 +25,7 @@ void do_syscall(Context *c)
     Log("Thers is a SYS_exit syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, 0);
 #endif
     c->GPRx = 0;
-    naive_uload(NULL, "/bin/menu");
+    naive_uload(NULL, "/bin/nterm");
     break;
 
   case SYS_yield: // SYS_yield　syscall

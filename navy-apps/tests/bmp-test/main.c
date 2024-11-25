@@ -4,7 +4,8 @@
 #include <NDL.h>
 #include <BMP.h>
 
-int main() {
+int main()
+{
   NDL_Init(0);
   int w, h;
   void *bmp = BMP_Load("/share/pictures/projectn.bmp", &w, &h);
@@ -14,6 +15,11 @@ int main() {
   free(bmp);
   NDL_Quit();
   printf("Test ends! Spinning...\n");
-  while (1);
+  char *buf[10];
+  while (1)
+  {
+    if (NDL_PollEvent(buf, 10))
+      exit(0);
+  }
   return 0;
 }
