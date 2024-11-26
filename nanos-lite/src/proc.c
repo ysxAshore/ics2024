@@ -1,8 +1,7 @@
 #include <proc.h>
+#include <stdint.h>
 
 #define MAX_NR_PROC 4
-
-void naive_uload(PCB *pcb, const char *filename);
 
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
 static PCB pcb_boot = {};
@@ -26,14 +25,11 @@ void hello_fun(void *arg)
 
 void init_proc()
 {
-  context_kload(&pcb[0], hello_fun, "A");
-  context_kload(&pcb[1], hello_fun, "B");
+  context_kload(&pcb[0], hello_fun, "ysxAshore");
+  context_uload(&pcb[1], "/bin/pal");
   switch_boot_pcb();
 
   Log("Initializing processes...");
-
-  // load program here
-  // naive_uload(NULL, "/bin/bmp-test");
 }
 
 Context *schedule(Context *prev)
@@ -45,8 +41,22 @@ Context *schedule(Context *prev)
 
 void context_kload(PCB *pcb, void (*entry)(void *), void *arg)
 {
-  // pcb->as.area isn't initialled
+  /*按照用户进程中的理解，Areaspace是用来表示用户PCB的可用空间,因此不这样用了
+  //pcb->as.area isn't initialled
   pcb->as.area.start = pcb->stack;
   pcb->as.area.end = pcb->stack + STACK_SIZE;
-  pcb->cp = kcontext(pcb->as.area, entry, arg);
+  */
+  Area area;
+  area.start = pcb->stack;
+  area.end = pcb->stack + STACK_SIZE;
+  pcb->cp = kcontext(area, entry, arg);
+}
+
+void context_uload(PCB *pcb, char *filename)
+{
+  Area area;
+  area.start = pcb->stack;
+  area.end = pcb->stack + STACK_SIZE;
+  pcb->cp = ucontext(&pcb->as, area, (void *)loader(pcb, filename));
+  pcb->cp->GPRx = (uintptr_t)heap.end;
 }

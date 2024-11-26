@@ -9,7 +9,6 @@ Context *__am_irq_handle(Context *c)
   if (user_handler)
   {
     Event ev = {0};
-    printf("%d %d\n", c->mcause, c->GPR1);
     switch (c->mcause)
     {
     case 0xb: // m-mode下　0xb是自陷+系统调用

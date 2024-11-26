@@ -28,7 +28,7 @@ int fs_open(const char *pathname, int flags, int mode);
 size_t fs_read(int fd, void *buf, size_t len);
 size_t fs_lseek(int fd, size_t offset, int whence);
 
-static uintptr_t loader(PCB *pcb, const char *filename)
+uintptr_t loader(PCB *pcb, const char *filename)
 {
   int fd = fs_open(filename, 0, 0);
   // read ELF Header and examine

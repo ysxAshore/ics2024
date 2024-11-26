@@ -22,6 +22,8 @@ extern PCB *current;
 
 Context *schedule(Context *prev);
 void context_kload(PCB *pcb, void (*entry)(void *), void *arg);
+void context_uload(PCB *pcb, char *filename);
 void init_proc();
 
+uintptr_t loader(PCB *pcb, const char *filename);
 #endif
