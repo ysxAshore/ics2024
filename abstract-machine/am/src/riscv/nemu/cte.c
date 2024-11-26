@@ -9,6 +9,7 @@ Context *__am_irq_handle(Context *c)
   if (user_handler)
   {
     Event ev = {0};
+    printf("%d %d\n", c->mcause, c->GPR1);
     switch (c->mcause)
     {
     case 0xb: // m-mode下　0xb是自陷+系统调用
@@ -45,7 +46,7 @@ bool cte_init(Context *(*handler)(Event, Context *))
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg)
 {
   Context *cp = (Context *)(kstack.end - sizeof(Context)); // 按照图示
-  cp->mepc = (uintptr_t)entry;                             // 指定入口点
+  cp->mepc = (uintptr_t)entry - 4;                         // 指定入口点,NEMU会加４
   cp->mstatus = 0xa00001800;
   cp->GPR2 = (uintptr_t)arg; // #define GPR2 gpr[10] a0
   return cp;
