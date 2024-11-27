@@ -87,7 +87,9 @@ void do_syscall(Context *c)
 #ifdef CONFIG_STRACE
     Log("Thers is a SYS_execve syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, 0);
 #endif
-    naive_uload(NULL, (const char *)c->GPR2);
+    context_uload(current, (char *)c->GPR2, (char **)c->GPR3, (char **)c->GPR4); // 此时pcb[1]的cp指向新的程序
+    switch_boot_pcb();                                                           // 将原进程上下文保存在pcb boot中
+    yield();                                                                     // 　终止执行
     c->GPRx = 0;
     break;
   case SYS_gettimeofday:

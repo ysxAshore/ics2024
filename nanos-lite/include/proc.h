@@ -21,8 +21,9 @@ typedef union
 extern PCB *current;
 
 Context *schedule(Context *prev);
+void switch_boot_pcb();
 void context_kload(PCB *pcb, void (*entry)(void *), void *arg);
-void context_uload(PCB *pcb, char *filename);
+void context_uload(PCB *pcb, char *filename, char *const argv[], char *const envp[]);
 void init_proc();
 
 uintptr_t loader(PCB *pcb, const char *filename);
