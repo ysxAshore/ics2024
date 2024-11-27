@@ -28,7 +28,7 @@ void init_proc()
   context_kload(&pcb[0], hello_fun, "ysxAshore");
   char *const argv[] = {"/bin/exec-test"};
   char *const envp[] = {NULL};
-  context_uload(&pcb[1], "/bin/exec-test", argv, envp);
+  context_uload(&pcb[1], "/bin/nterm", argv, envp);
   switch_boot_pcb();
   Log("Initializing processes...");
 }
@@ -58,7 +58,6 @@ void context_uload(PCB *pcb, char *filename, char *const argv[], char *const env
   Area area;
   area.start = pcb->stack;
   area.end = pcb->stack + STACK_SIZE;
-  pcb->cp = ucontext(&pcb->as, area, (void *)loader(pcb, filename));
 
   uintptr_t *user_stack = (uintptr_t *)new_page(8);
   // 将参数按照ABI规定加载到用户栈中 栈是向下的
@@ -100,5 +99,7 @@ void context_uload(PCB *pcb, char *filename, char *const argv[], char *const env
   for (int i = 0; i < envc; ++i)
     user_stack[argc + 2 + i] = (uintptr_t)strArr[argc + i];
   user_stack[argc + envc + 2] = 0;
+
+  pcb->cp = ucontext(&pcb->as, area, (void *)loader(pcb, filename));
   pcb->cp->GPRx = (uintptr_t)user_stack;
 }

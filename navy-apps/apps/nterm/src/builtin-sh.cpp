@@ -96,11 +96,32 @@ static int cmd_help(char *args)
   return 0;
 }
 
-static int cmd_execve(char *args)
+static int cmd_execve(char *args, char *argv_origin)
 {
   setenv("PATH", "/bin", 0);
-  if (execvp(args, NULL) == -1) // execvp failed return -1
-    return -1;
+  if (argv_origin = NULL)
+  {
+    char *const argv[] = {NULL};
+    if (execvp(args, argv) == -1) // execvp failed return -1
+      return -1;
+  }
+  else
+  {
+    char *argv[20] = {NULL};
+    int i = 0;
+    char *tmp = strtok(argv_origin, " ");
+    while (tmp != NULL)
+    {
+      argv[i] = (char *)malloc(strlen(tmp));
+      strcpy(argv[i], tmp);
+      ++i;
+      tmp = strtok(NULL, " ");
+    }
+    i = 0;
+    printf("%p \n", argv);
+    if (execvp(args, argv) == -1) // execvp failed return -1
+      return -1;
+  }
   return 0;
 }
 
@@ -178,7 +199,7 @@ static void sh_handle_cmd(const char *cmd)
     {
       if (strcmp(sub_cmd, program_table[i]) == 0)
       {
-        cmd_execve(sub_cmd);
+        cmd_execve(sub_cmd, args);
         return;
       }
     }
