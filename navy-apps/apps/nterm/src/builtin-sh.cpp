@@ -42,7 +42,7 @@ static struct
   int (*handler)(char *);
 } cmd_table[] = {
     {"help", "Display information about all supported commands", cmd_help},
-    {"echo", "Display a line of text", cmd_echo},
+    //{"echo", "Display a line of text", cmd_echo},
 
 };
 
@@ -98,7 +98,6 @@ static int cmd_help(char *args)
 
 static int cmd_execve(char *args, char *argv_origin)
 {
-  setenv("PATH", "/bin", 0);
   if (argv_origin = NULL)
   {
     char *const argv[] = {NULL};
@@ -118,7 +117,6 @@ static int cmd_execve(char *args, char *argv_origin)
       tmp = strtok(NULL, " ");
     }
     i = 0;
-    printf("%p \n", argv);
     if (execvp(args, argv) == -1) // execvp failed return -1
       return -1;
   }
@@ -164,6 +162,8 @@ void trim_whitespace(char *str)
 
 static void sh_handle_cmd(const char *cmd)
 {
+
+  setenv("PATH", "/bin:/usr/bin", 0); // 0 indicate if PATH is exist,not modify else modify
   // strlen strcpy strtk需要在非空时调用
   int cmd_len = strlen(cmd);
   char *str = (char *)malloc(cmd_len);
@@ -195,6 +195,7 @@ static void sh_handle_cmd(const char *cmd)
         return;
       }
     }
+    // 还是要保留program_table,来区分program和busybox的参数
     for (i = 0; i < PM_CMD; ++i)
     {
       if (strcmp(sub_cmd, program_table[i]) == 0)
@@ -203,7 +204,21 @@ static void sh_handle_cmd(const char *cmd)
         return;
       }
     }
-    sh_printf("Unknown command '%s'\n", sub_cmd);
+    char *argv[20] = {NULL};
+    argv[0] = "busybox";
+    argv[1] = (char *)malloc(strlen(sub_cmd));
+    strcpy(argv[1], sub_cmd);
+    int i = 0;
+    char *tmp = strtok(args, " ");
+    while (tmp != NULL)
+    {
+      argv[2 + i] = (char *)malloc(strlen(tmp));
+      strcpy(argv[2 + i], tmp);
+      ++i;
+      tmp = strtok(NULL, " ");
+    }
+    if (execvp(sub_cmd, argv) == -1)
+      sh_printf("Unknown command '%s'\n", sub_cmd);
   }
 }
 

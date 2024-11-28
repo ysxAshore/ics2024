@@ -18,6 +18,8 @@ void do_syscall(Context *c)
   uintptr_t a[4];
   a[0] = c->GPR1;
   int result;
+  // Note that GPR2 and GPRx are the same register in RISCV
+  // the assignment of GPRx needs to be placed after the use of GPR2
   switch (a[0])
   {
   case SYS_exit: // SYS_exit syscall
@@ -84,14 +86,25 @@ void do_syscall(Context *c)
     break;
 
   case SYS_execve:
+    if (fs_open((char *)c->GPR2, 0, 0) != -1)
+    {
 #ifdef CONFIG_STRACE
-    Log("Thers is a SYS_execve syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, 0);
+      Log("Thers is a SYS_execve syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, 0);
 #endif
-    context_uload(current, (char *)c->GPR2, (char **)c->GPR3, (char **)c->GPR4); // 此时pcb[1]的cp指向新的程序
-    switch_boot_pcb();                                                           // 将原进程上下文保存在pcb boot中
-    yield();                                                                     // 　终止执行
-    c->GPRx = 0;
+      context_uload(current, (char *)c->GPR2, (char **)c->GPR3, (char **)c->GPR4); // 此时pcb[1]的cp指向新的程序
+      switch_boot_pcb();                                                           // 将原进程上下文保存在pcb boot中
+      yield();                                                                     // 　终止执行
+      c->GPRx = 0;
+    }
+    else
+    {
+#ifdef CONFIG_STRACE
+      Log("Thers is a SYS_execve syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, -1);
+#endif
+      c->GPRx = -1;
+    }
     break;
+
   case SYS_gettimeofday:
     result = time_gettimeofday((struct timeval *)c->GPR2, (struct timezone *)c->GPR3);
 #ifdef CONFIG_STRACE
