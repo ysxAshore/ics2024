@@ -51,6 +51,9 @@ void isa_reg_display()
   printf("mtvec: \t");
   printf(FMT_WORD, cpu.csrs.mtvec);
   printf("\n");
+  printf("mtvec: \t");
+  printf(FMT_WORD, cpu.csrs.satp);
+  printf("\n");
 }
 
 word_t isa_reg_str2val(const char *s, bool *success)

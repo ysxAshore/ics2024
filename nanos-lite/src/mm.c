@@ -12,12 +12,18 @@ void *new_page(size_t nr_page)
 #ifdef HAS_VME
 static void *pg_alloc(int n)
 {
-  return NULL;
+  size_t nr_page = n / PGSIZE;
+  nr_page = n % PGSIZE == 0 ? nr_page : nr_page + 1;
+  void *ptr = new_page(nr_page); // 分配的是未更新pf前的pf~pf+nr_page*PGSIZE
+  void *start = ptr - nr_page * PGSIZE;
+  memset(start, 0, nr_page * PGSIZE);
+  return start;
 }
 #endif
 
 void free_page(void *p)
 {
+  // 顺序分配不会回收
   panic("not implement yet");
 }
 

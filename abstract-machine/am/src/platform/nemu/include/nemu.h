@@ -38,10 +38,13 @@
 extern char _pmem_start;
 #define PMEM_SIZE (128 * 1024 * 1024)
 #define PMEM_END ((uintptr_t) & _pmem_start + PMEM_SIZE)
-#define NEMU_PADDR_SPACE                  \
-  RANGE(&_pmem_start, PMEM_END),          \
-      RANGE(FB_ADDR, FB_ADDR + 0x200000), \
-      RANGE(MMIO_BASE, MMIO_BASE + 0x1000) /* serial, rtc, screen, keyboard */
+#define NEMU_PADDR_SPACE                    \
+  RANGE(&_pmem_start, PMEM_END),            \
+      RANGE(FB_ADDR, FB_ADDR + 0x200000),   \
+      RANGE(MMIO_BASE, MMIO_BASE + 0x1000), \
+      RANGE(AUDIO_SBUF_ADDR, AUDIO_SBUF_ADDR + 0x10000)
+/*依次定义了128MB物理内存PMEM，2MB显存FB_ADDR，串口SERIAL_PORT，4B键盘KBD_ADDR，8B时钟RTC_ADDR，8B显卡控制VGACTL_ADDR，
+  20B音频控制AUDIO_ADDR和64KB声卡缓冲区 */
 
 typedef uintptr_t PTE;
 

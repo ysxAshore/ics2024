@@ -127,6 +127,10 @@ void csrrw_excute(word_t src1, word_t imm, int rd)
     R(rd) = cpu.csrs.mcause;
     cpu.csrs.mcause = src1;
     break;
+  case 0x180:
+    R(rd) = cpu.csrs.satp;
+    cpu.csrs.satp = src1;
+    break;
   default:
     panic("The %lx csr not implemented", imm);
     break;
@@ -151,6 +155,10 @@ void csrrs_excute(word_t src1, word_t imm, int rd)
   case 0x342:
     R(rd) = cpu.csrs.mcause;
     cpu.csrs.mcause |= src1;
+    break;
+  case 0x180:
+    R(rd) = cpu.csrs.satp;
+    cpu.csrs.satp |= src1;
     break;
   default:
     panic("The %lx csr not implemented", imm);

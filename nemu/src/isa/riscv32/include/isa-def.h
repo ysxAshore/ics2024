@@ -20,10 +20,11 @@
 
 typedef struct
 {
-  word_t mcause;  // 0x342 MRW mcause Machinetrapcause.
-  word_t mstatus; // 0x300 MRW mstatus Machinestatusregister
-  word_t mtvec;   //  0x305 MRW mtvec Machinetrap-handlerbaseaddress.
-  vaddr_t mepc;   // 0x341 MRW mepc Machineexceptionprogramcounter.
+  word_t mcause;  // 0x342 MRW mcause Machine　trap　cause.
+  word_t mstatus; // 0x300 MRW mstatus Machine　status　register
+  word_t mtvec;   //  0x305 MRW mtvec Machine　trap-handler　base　address.
+  vaddr_t mepc;   // 0x341 MRW mepc Machine　exception　program　counter.
+  word_t satp;    // 　0x180 SRW satp Supervisor　address　translation　and　protection
 } CSRs;
 
 typedef struct
@@ -38,7 +39,5 @@ typedef struct
 {
   uint32_t inst;
 } MUXDEF(CONFIG_RV64, riscv64_ISADecodeInfo, riscv32_ISADecodeInfo);
-
-#define isa_mmu_check(vaddr, len, type) (MMU_DIRECT)
 
 #endif
