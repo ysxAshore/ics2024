@@ -40,6 +40,8 @@ bool vme_init(void *(*pgalloc_f)(int), void (*pgfree_f)(void *))
     void *va = segments[i].start;
     for (; va < segments[i].end; va += PGSIZE)
     {
+      if ((uintptr_t)va >= 0x82600000 && (uintptr_t)va <= 0x82700000)
+        printf("kernel mapped %x to %x\n", va, va);
       map(&kas, va, va, 0); // 建立1:1映射关系填写页目录表和页表，通过 1:1 映射机制，确保内核在启用分页后仍可直接访问物理内存。这样既保留了对硬件资源的高效访问，又为后续的虚拟内存管理提供了灵活基础
     }
   }
@@ -96,7 +98,7 @@ void map(AddrSpace *as, void *va, void *pa, int prot)
   assert(BITS(va_t, 63, 38) == 0 || BITS(va_t, 63, 38) == -1); // vaddr的63~39必须和38一致
 
   uint64_t first_content = ((uint64_t *)as->ptr)[VA_VPN_2(va_t)];
-  if (first_content == 0)
+  if ((first_content & 0x1) == 0)
   {
     void *second_ptr = pgalloc_usr(4 * PGSIZE); // 第二级页表基址
     void *third_ptr = pgalloc_usr(4 * PGSIZE);  // 第三级页表基址
@@ -112,7 +114,7 @@ void map(AddrSpace *as, void *va, void *pa, int prot)
     assert((first_content & 0b1111) == 0b0001);
     void *second_ptr = (void *)((first_content >> 10) << 12);
     uint64_t second_content = ((uint64_t *)second_ptr)[VA_VPN_1(va_t)];
-    if (second_content == 0)
+    if ((second_content & 0x1) == 0)
     {
       void *third_ptr = pgalloc_usr(4 * PGSIZE); // 第三级页表基址
       uintptr_t ppn2 = ((uintptr_t)third_ptr >> 12) << 10;
@@ -134,7 +136,8 @@ Context *ucontext(AddrSpace *as, Area kstack, void *entry)
 {
   // 因为kcontext还会修改c->GPR2,所以这里为了避免对寄存器的修改，单独设置ucontext内容
   Context *cp = (Context *)(kstack.end - sizeof(Context)); // 按照图示
-  cp->mepc = (uintptr_t)entry - 4;                         // 指定入口点,NEMU会加４
+  cp->mepc = (uintptr_t)entry;                             // 指定入口点,NEMU会加４
   cp->pdir = as->ptr;
+  cp->mstatus = 0xa00001880;
   return cp;
 }

@@ -15,6 +15,8 @@
 
 #include <isa.h>
 
+#define IRQ_TIMER 0x8000000000000007 // for riscv64
+
 word_t isa_raise_intr(word_t NO, vaddr_t epc)
 {
   /* TODO: Trigger an interrupt/exception with ``NO''.
@@ -22,11 +24,19 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc)
    */
   cpu.csrs.mcause = 0xb; // in m-mode,enviroment call always is 0xb
   cpu.csrs.mepc = epc;
-  IFDEF(CONFIG_ETRACE, printf("\nThere is a No.%ld exception at " FMT_WORD "\n", NO, epc));
+  cpu.gpr[17] = NO;
+  word_t mie = (cpu.csrs.mstatus >> 3) & 0x1;
+  cpu.csrs.mstatus = (cpu.csrs.mstatus & ~(1 << 3)) | (mie << 7); // 置MIE为0,并将MIE保存到PMIE
+  IFDEF(CONFIG_ETRACE, printf("\nThere is a No.%lx exception at " FMT_WORD "\n", NO, epc));
   return cpu.csrs.mtvec;
 }
 
 word_t isa_query_intr()
 {
+  if (cpu.INTR && ((cpu.csrs.mstatus >> 3) & 0x1))
+  {
+    cpu.INTR = false;
+    return IRQ_TIMER;
+  }
   return INTR_EMPTY;
 }

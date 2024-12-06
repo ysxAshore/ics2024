@@ -170,7 +170,10 @@ void mret_excute(vaddr_t *dnpc)
 {
   if (cpu.csrs.mcause == 0xb)
   {
-    *dnpc = cpu.csrs.mepc + 4;
+    *dnpc = cpu.csrs.mepc;
+    word_t pmie = (cpu.csrs.mstatus >> 7) & 0x1;
+    cpu.csrs.mstatus = (cpu.csrs.mstatus & ~(1 << 3)) | (pmie << 3);
+    cpu.csrs.mstatus = cpu.csrs.mstatus | (1 << 7);
     IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());
   }
   else
@@ -388,7 +391,7 @@ static int decode_exec(Decode *s)
   INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw, I, csrrw_excute(src1, imm, rd));
   INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs, I, csrrs_excute(src1, imm, rd));
   INSTPAT("0011000 00010 00000 000 00000 11100 11", mret, R, mret_excute(&s->dnpc));
-  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall, R, s->dnpc = isa_raise_intr(isa_reg_str2val("a7", &sign), s->pc));
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall, R, s->dnpc = isa_raise_intr(isa_reg_str2val("a7", &sign), s->dnpc));
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv, N, INV(s->pc));
   INSTPAT_END();
 

@@ -15,6 +15,8 @@ static Context *do_event(Event e, Context *c)
     do_syscall(c);
     break;
   case EVENT_IRQ_TIMER: // native的AM在创建上下文的时候默认会打开中断,需要在事件处理回调函数中识别出时钟中断事件，但是直接返回上下文
+    Log("Encouter a timer interrupt event");
+    c = schedule(c);
     break;
   case EVENT_IRQ_IODEV:
     break;
