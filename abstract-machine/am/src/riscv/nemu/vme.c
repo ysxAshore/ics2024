@@ -135,5 +135,6 @@ Context *ucontext(AddrSpace *as, Area kstack, void *entry)
   // 因为kcontext还会修改c->GPR2,所以这里为了避免对寄存器的修改，单独设置ucontext内容
   Context *cp = (Context *)(kstack.end - sizeof(Context)); // 按照图示
   cp->mepc = (uintptr_t)entry - 4;                         // 指定入口点,NEMU会加４
+  cp->pdir = as->ptr;
   return cp;
 }

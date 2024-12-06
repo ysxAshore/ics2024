@@ -36,16 +36,25 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type)
 
   // access first page use paddr_read
   uint64_t first_content = paddr_read(first_base + VA_VPN_2(vaddr) * 8, 8);
+  if (PTE_XWRV(first_content) != 0b00001)
+    printf("first content invalid,pc:0x%lx vaddr:0x%lx first_base:0x%lx addr:0x%lx\n first_content:0x%lx\n",
+           cpu.pc, vaddr, first_base, first_base + VA_VPN_2(vaddr) * 8, first_content);
   assert(PTE_XWRV(first_content) == 0b0001); // 一定是4KB的粒度
 
   // access second page
   vaddr_t second_base = (first_content >> 10) << 12;
   uint64_t second_content = paddr_read(second_base + VA_VPN_1(vaddr) * 8, 8);
-  assert(PTE_XWRV(second_content) == 0b0001); // 一定是4KB的粒度
+  if (PTE_XWRV(second_content) != 0b00001)
+    printf("second content invalid,pc:0x%lx vaddr:0x%lx second_base:0x%lx addr:0x%lx\n second_content:0x%lx\n",
+           cpu.pc, vaddr, second_base, second_base + VA_VPN_1(vaddr) * 8, second_content);
+  assert((PTE_XWRV(second_content)) == 0b0001); // 一定是4KB的粒度
 
   // access third page
   vaddr_t third_base = (second_content >> 10) << 12;
   uint64_t third_content = paddr_read(third_base + VA_VPN_0(vaddr) * 8, 8);
+  if (PTE_V(third_content) != 0b00001)
+    printf("third content invalid,pc:0x%lx vaddr:0x%lx third_base:0x%lx addr:0x%lx\n third_content:0x%lx\n",
+           cpu.pc, vaddr, third_base, third_base + VA_VPN_1(vaddr) * 8, third_content);
   assert(PTE_V(third_content) == 0b1); // 一定是有效的
   switch (type)
   {
@@ -66,7 +75,7 @@ paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type)
   paddr_t ppn = (third_content >> 10) << 12;
   paddr_t paddr = ppn | VA_OFFSET(vaddr);
   // 检查计算的物理地址是否与虚拟地址相等，否则断言失败
-  assert(paddr == vaddr);
+  // assert(paddr == vaddr); //user program must not equal
 
   return paddr;
 }

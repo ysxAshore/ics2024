@@ -52,9 +52,41 @@ uintptr_t loader(PCB *pcb, const char *filename)
     if (phdrs[i].p_type == PT_LOAD)
     {
       fs_lseek(fd, phdrs[i].p_offset, 0);
-      fs_read(fd, (void *)phdrs[i].p_vaddr, phdrs[i].p_filesz);
-      // void *memset(void *s, int c, size_t n)
-      memset((void *)(phdrs[i].p_vaddr + phdrs[i].p_filesz), 0, phdrs[i].p_memsz - phdrs[i].p_filesz);
+
+      void *va = (void *)phdrs[i].p_vaddr;
+      uintptr_t offset = (uintptr_t)va % PGSIZE;
+      void *filesize = va + phdrs[i].p_filesz;
+      size_t N = (phdrs[i].p_memsz + offset) / PGSIZE + ((phdrs[i].p_memsz + offset) % PGSIZE ? 1 : 0);
+      printf("There is virtual address %x,offset is %x,filesize pointer is %x,needs %x page\n", va, offset, filesize, N);
+      for (size_t j = 0; j < N; j++)
+      {
+        void *pa = new_page(1) - PGSIZE;
+        memset(pa, 0, offset);
+
+        printf("Calling map funtion to map %x to %x\n", va - offset, pa);
+        map(&pcb->as, va - offset, pa, 3); // in am_native,prot & MMAP_READ0x1 prot & MMAP_WRITE0x2
+
+        uintptr_t readsize = PGSIZE - offset;
+        if (va + readsize > filesize)
+        {
+          readsize = filesize - va > 0 ? filesize - va : 0;
+          int len = fs_read(fd, pa + offset, readsize);
+          memset(pa + offset + len, 0, PGSIZE - offset - len);
+          printf("Will read %x size from file to %x,and set %x numbers of 0 to %x\n", readsize, pa + offset, PGSIZE - offset - len, pa + offset + len);
+        }
+        else
+        {
+          fs_read(fd, pa + offset, readsize);
+          printf("Will read %x size from file to %x\n", readsize, pa + offset);
+        }
+        va = va - offset + PGSIZE;
+        offset = 0;
+      }
+      if (pcb->max_brk < phdrs[i].p_vaddr + phdrs[i].p_memsz)
+        pcb->max_brk = phdrs[i].p_vaddr + phdrs[i].p_memsz;
+      // fs_read(fd, (void *)phdrs[i].p_vaddr, phdrs[i].p_filesz);
+      // // void *memset(void *s, int c, size_t n)
+      // memset((void *)(phdrs[i].p_vaddr + phdrs[i].p_filesz), 0, phdrs[i].p_memsz - phdrs[i].p_filesz);
     }
   }
   return ehdr.e_entry;

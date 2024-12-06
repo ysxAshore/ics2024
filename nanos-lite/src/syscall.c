@@ -10,6 +10,7 @@ int fs_close(int fd);
 size_t fs_lseek(int fd, size_t offset, int whence);
 char *getFdName(int fd);
 void naive_uload(PCB *pcb, const char *filename);
+int mm_brk(uintptr_t brk);
 
 int time_gettimeofday(struct timeval *tv, struct timezone *tz);
 
@@ -79,10 +80,11 @@ void do_syscall(Context *c)
     break;
 
   case SYS_brk: //// SYS_brk　syscall
+    result = mm_brk(c->GPR2);
 #ifdef CONFIG_STRACE
-    Log("Thers is a SYS_brk syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, 0);
+    Log("Thers is a SYS_brk syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, result);
 #endif
-    c->GPRx = 0;
+    c->GPRx = result;
     break;
 
   case SYS_execve:

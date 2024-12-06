@@ -17,7 +17,7 @@ void hello_fun(void *arg)
   int j = 1;
   while (1)
   {
-    if (j % 1000 == 0)
+    if (j % 10 == 0)
       Log("Hello World from Nanos-lite with arg '%s' for the %dth time!", (uintptr_t)arg, j);
     j++;
     yield();
@@ -37,7 +37,7 @@ void init_proc()
 Context *schedule(Context *prev)
 {
   current->cp = prev;
-  current = (current == &pcb[0] ? &pcb[1] : &pcb[0]);
+  current = (current == &pcb[1] ? &pcb[0] : &pcb[1]);
   return current->cp;
 }
 
@@ -60,7 +60,15 @@ void context_uload(PCB *pcb, char *filename, char *const argv[], char *const env
   area.start = pcb->stack;
   area.end = pcb->stack + STACK_SIZE;
 
+  protect(&pcb->as);
+
   uintptr_t *user_stack = (uintptr_t *)new_page(8);
+
+  void *pa = (void *)user_stack;
+  void *va = pcb->as.area.end;
+  for (size_t i = 8; i >= 1; --i)
+    map(&pcb->as, va - i * PGSIZE, pa - i * PGSIZE, 3);
+
   // 将参数按照ABI规定加载到用户栈中 栈是向下的
   // 1.获得argv和envp的数量
   int argc = 0, envc = 0;

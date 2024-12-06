@@ -2,10 +2,14 @@
 #include <riscv/riscv.h>
 #include <klib.h>
 
+void __am_get_cur_as(Context *c);
+void __am_switch(Context *c);
+
 static Context *(*user_handler)(Event, Context *) = NULL;
 
 Context *__am_irq_handle(Context *c)
 {
+  __am_get_cur_as(c);
   if (user_handler)
   {
     Event ev = {0};
@@ -25,7 +29,7 @@ Context *__am_irq_handle(Context *c)
     c = user_handler(ev, c);
     assert(c != NULL);
   }
-
+  __am_switch(c);
   return c;
 }
 
@@ -48,6 +52,7 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg)
   cp->mepc = (uintptr_t)entry - 4;                         // 指定入口点,NEMU会加４
   cp->mstatus = 0xa00001800;
   cp->GPR2 = (uintptr_t)arg; // #define GPR2 gpr[10] a0
+  cp->pdir = NULL;
   return cp;
 }
 
