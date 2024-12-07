@@ -20,11 +20,12 @@
 
 typedef struct
 {
-  word_t mcause;  // 0x342 MRW mcause Machine　trap　cause.
-  word_t mstatus; // 0x300 MRW mstatus Machine　status　register
-  word_t mtvec;   //  0x305 MRW mtvec Machine　trap-handler　base　address.
-  vaddr_t mepc;   // 0x341 MRW mepc Machine　exception　program　counter.
-  word_t satp;    // 　0x180 SRW satp Supervisor　address　translation　and　protection
+  word_t mcause;   // 0x342 MRW mcause Machine　trap　cause.
+  word_t mstatus;  // 0x300 MRW mstatus Machine　status　register
+  word_t mtvec;    //  0x305 MRW mtvec Machine　trap-handler　base　address.
+  vaddr_t mepc;    // 0x341 MRW mepc Machine　exception　program　counter.
+  word_t satp;     // 　0x180 SRW satp Supervisor　address　translation　and　protection
+  word_t mscratch; // 0x340
 } CSRs;
 
 typedef struct
@@ -34,6 +35,9 @@ typedef struct
   CSRs csrs;
   bool INTR;
 } MUXDEF(CONFIG_RV64, riscv64_CPU_state, riscv32_CPU_state);
+
+#define MSTATUS_MIE_BITS 0x8
+#define MSTATUS_MPIE_BITS 0x80
 
 // decode
 typedef struct

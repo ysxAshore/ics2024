@@ -119,6 +119,10 @@ void csrrw_excute(word_t src1, word_t imm, int rd)
     R(rd) = cpu.csrs.mtvec;
     cpu.csrs.mtvec = src1;
     break;
+  case 0x340:
+    R(rd) = cpu.csrs.mscratch;
+    cpu.csrs.mscratch = src1;
+    break;
   case 0x341:
     R(rd) = cpu.csrs.mepc;
     cpu.csrs.mepc = src1;
@@ -132,7 +136,7 @@ void csrrw_excute(word_t src1, word_t imm, int rd)
     cpu.csrs.satp = src1;
     break;
   default:
-    panic("The %lx csr not implemented", imm);
+    panic("%lx The %lx csr not implemented", cpu.pc, imm);
     break;
   }
 }
@@ -147,6 +151,10 @@ void csrrs_excute(word_t src1, word_t imm, int rd)
   case 0x305:
     R(rd) = cpu.csrs.mtvec;
     cpu.csrs.mtvec |= src1;
+    break;
+  case 0x340:
+    R(rd) = cpu.csrs.mscratch;
+    cpu.csrs.mscratch |= src1;
     break;
   case 0x341:
     R(rd) = cpu.csrs.mepc;
@@ -168,16 +176,12 @@ void csrrs_excute(word_t src1, word_t imm, int rd)
 
 void mret_excute(vaddr_t *dnpc)
 {
-  if (cpu.csrs.mcause == 0xb)
-  {
-    *dnpc = cpu.csrs.mepc;
-    word_t pmie = (cpu.csrs.mstatus >> 7) & 0x1;
-    cpu.csrs.mstatus = (cpu.csrs.mstatus & ~(1 << 3)) | (pmie << 3);
-    cpu.csrs.mstatus = cpu.csrs.mstatus | (1 << 7);
-    IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());
-  }
-  else
-    *dnpc = cpu.csrs.mepc;
+  *dnpc = cpu.csrs.mepc;
+  word_t pmie = cpu.csrs.mstatus & MSTATUS_MPIE_BITS;
+  cpu.csrs.mstatus = (cpu.csrs.mstatus & ~MSTATUS_MIE_BITS)|(pmie >> 4);
+  cpu.csrs.mstatus |= MSTATUS_MPIE_BITS;
+  // assert(0);
+  IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());
 }
 
 // 用spike的乘法实现

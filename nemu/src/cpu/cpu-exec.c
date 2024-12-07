@@ -26,7 +26,7 @@
  */
 #define MAX_INST_TO_PRINT 10
 
-CPU_state cpu = {.csrs.mstatus = 0xa00001800};
+CPU_state cpu = {.csrs.mstatus = 0xa00001800, .csrs.mscratch = 0x0};
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
@@ -94,10 +94,7 @@ static void execute(uint64_t n)
   {
     exec_once(&s, cpu.pc);
     g_nr_guest_inst++;
-    word_t intr = isa_query_intr();
-    if (intr != INTR_EMPTY)
-      cpu.pc = isa_raise_intr(intr, cpu.pc); // cpu.pc指向下一个要执行的指令
-    trace_and_difftest(&s, cpu.pc);          // this cpu.pc is next pc,but s->pc is now pc
+    trace_and_difftest(&s, cpu.pc); // this cpu.pc is next pc,but s->pc is now pc
     if (nemu_state.state != NEMU_RUNNING)
     { // error,the output of iringbuf is assigned here
 #ifdef CONFIG_ITRACE
@@ -112,6 +109,10 @@ static void execute(uint64_t n)
       break;
     }
     IFDEF(CONFIG_DEVICE, device_update());
+
+    word_t intr = isa_query_intr();
+    if (intr != INTR_EMPTY)
+      cpu.pc = isa_raise_intr(intr, cpu.pc); // cpu.pc指向下一个要执行的指令
   }
 }
 

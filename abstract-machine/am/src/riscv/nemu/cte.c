@@ -18,10 +18,11 @@ Context *__am_irq_handle(Context *c)
     case 0xb: // m-mode下　0xb是自陷+系统调用
       if (c->GPR1 == -1)
         ev.event = EVENT_YIELD;
-      else if (c->GPR1 == 0x8000000000000007) // 0x8000000000000007
-        ev.event = EVENT_IRQ_TIMER;
       else
         ev.event = EVENT_SYSCALL;
+      break;
+    case 0x8000000000000007:
+      ev.event = EVENT_IRQ_TIMER;
       break;
     default:
       ev.event = EVENT_ERROR;
@@ -44,7 +45,6 @@ bool cte_init(Context *(*handler)(Event, Context *))
 
   // register event handler
   user_handler = handler; // 使用handler来作为全局的user_handler
-
   return true;
 }
 

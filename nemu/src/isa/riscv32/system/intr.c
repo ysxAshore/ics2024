@@ -22,18 +22,18 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc)
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * Then return the address of the interrupt/exception vector.
    */
-  cpu.csrs.mcause = 0xb; // in m-mode,enviroment call always is 0xb
+  cpu.csrs.mcause = NO == IRQ_TIMER ? IRQ_TIMER : 0xb; // in m-mode,enviroment call always is 0xb
   cpu.csrs.mepc = epc;
-  cpu.gpr[17] = NO;
-  word_t mie = (cpu.csrs.mstatus >> 3) & 0x1;
-  cpu.csrs.mstatus = (cpu.csrs.mstatus & ~(1 << 3)) | (mie << 7); // 置MIE为0,并将MIE保存到PMIE
+  word_t mie = cpu.csrs.mstatus & MSTATUS_MIE_BITS;
+  cpu.csrs.mstatus = cpu.csrs.mstatus & ~MSTATUS_MIE_BITS;
+  cpu.csrs.mstatus |= (mie << 4); // 置MIE为0,并将MIE保存到PMIE
   IFDEF(CONFIG_ETRACE, printf("\nThere is a No.%lx exception at " FMT_WORD "\n", NO, epc));
   return cpu.csrs.mtvec;
 }
 
 word_t isa_query_intr()
 {
-  if (cpu.INTR && ((cpu.csrs.mstatus >> 3) & 0x1))
+  if (cpu.INTR && (cpu.csrs.mstatus & MSTATUS_MIE_BITS))
   {
     cpu.INTR = false;
     return IRQ_TIMER;
