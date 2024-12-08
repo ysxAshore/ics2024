@@ -51,8 +51,11 @@ void isa_reg_display()
   printf("mtvec: \t");
   printf(FMT_WORD, cpu.csrs.mtvec);
   printf("\n");
-  printf("mtvec: \t");
+  printf("matp: \t");
   printf(FMT_WORD, cpu.csrs.satp);
+  printf("\n");
+  printf("mscratch: \t");
+  printf(FMT_WORD, cpu.csrs.mscratch);
   printf("\n");
 }
 
@@ -96,6 +99,11 @@ word_t isa_reg_str2val(const char *s, bool *success)
   {
     *success = true;
     return cpu.csrs.mtvec;
+  }
+  else if (strcmp("mscratch", s + 1) == 0)
+  {
+    *success = true;
+    return cpu.csrs.mscratch;
   }
   else
     return 0;

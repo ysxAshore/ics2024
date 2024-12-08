@@ -30,6 +30,7 @@ size_t fs_lseek(int fd, size_t offset, int whence);
 
 uintptr_t loader(PCB *pcb, const char *filename)
 {
+  pcb->max_brk = 0; // pcb是current时会保留之前的max_brk，因此统一进行初始化
   int fd = fs_open(filename, 0, 0);
   // read ELF Header and examine
   Elf_Ehdr ehdr;

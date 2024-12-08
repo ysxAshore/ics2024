@@ -139,5 +139,7 @@ Context *ucontext(AddrSpace *as, Area kstack, void *entry)
   cp->mepc = (uintptr_t)entry;                             // 指定入口点,NEMU会加４
   cp->pdir = as->ptr;
   cp->mstatus = 0xa00001880;
+  cp->np = 0;                           // np
+  cp->gpr[2] = (uintptr_t)as->area.end; // sp
   return cp;
 }

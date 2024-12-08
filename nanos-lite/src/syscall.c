@@ -91,7 +91,7 @@ void do_syscall(Context *c)
     if (fs_open((char *)c->GPR2, 0, 0) != -1)
     {
 #ifdef CONFIG_STRACE
-      Log("Thers is a SYS_execve syscall,the arguments is %p,%p,%p,the return value is %p", c->GPR2, c->GPR3, c->GPR4, 0);
+      Log("Thers is a SYS_execve syscall,the arguments is %s,%p,%p,the return value is %p", (char *)c->GPR2, c->GPR3, c->GPR4, 0);
 #endif
       context_uload(current, (char *)c->GPR2, (char **)c->GPR3, (char **)c->GPR4); // 此时pcb[1]的cp指向新的程序
       switch_boot_pcb();                                                           // 将原进程上下文保存在pcb boot中

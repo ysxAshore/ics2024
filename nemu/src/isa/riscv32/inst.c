@@ -180,7 +180,6 @@ void mret_excute(vaddr_t *dnpc)
   word_t pmie = cpu.csrs.mstatus & MSTATUS_MPIE_BITS;
   cpu.csrs.mstatus = (cpu.csrs.mstatus & ~MSTATUS_MIE_BITS)|(pmie >> 4);
   cpu.csrs.mstatus |= MSTATUS_MPIE_BITS;
-  // assert(0);
   IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());
 }
 

@@ -55,6 +55,8 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg)
   cp->mstatus = 0xa00001880;
   cp->GPR2 = (uintptr_t)arg; // #define GPR2 gpr[10] a0
   cp->pdir = NULL;
+  cp->np = 1;
+  cp->gpr[2] = (uintptr_t)kstack.end; // sp
   return cp;
 }
 
