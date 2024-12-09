@@ -7,6 +7,8 @@
 #define MULTIPROGRAM_YIELD()
 #endif
 
+void reviseFG_PCB(int i);
+
 #define NAME(key) \
   [AM_KEY_##key] = #key,
 
@@ -39,7 +41,15 @@ size_t events_read(void *buf, size_t offset, size_t len)
   {
     int result = 0;
     if (ev.keydown)
+    {
       result = snprintf((char *)buf, len, "kd %s\n", keyname[ev.keycode]);
+      if (strcmp(keyname[ev.keycode], "F1") == 0)
+        reviseFG_PCB(1);
+      else if (strcmp(keyname[ev.keycode], "F2") == 0)
+        reviseFG_PCB(2);
+      else if (strcmp(keyname[ev.keycode], "F3") == 0)
+        reviseFG_PCB(3);
+    }
     else
       result = snprintf((char *)buf, len, "ku %s\n", keyname[ev.keycode]);
     return result;

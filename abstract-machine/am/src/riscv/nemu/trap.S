@@ -121,6 +121,6 @@ save_context:
   csrw mscratch,t2
 
 kernel_restore:
-  MAP(REGS, POP)
+  MAP(REGS, POP) //因为之前要使用寄存器，所以放在所有使用完除sp之外的寄存器之后恢复
   LOAD sp,OFFSET_SP(sp)
   mret

@@ -6,6 +6,7 @@
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
 static PCB pcb_boot = {};
 PCB *current = NULL;
+PCB *fg_pcb = NULL;
 
 void switch_boot_pcb()
 {
@@ -28,9 +29,12 @@ void init_proc()
   char *const argv1[] = {NULL};
   char *const envp1[] = {NULL};
   context_uload(&pcb[0], "/bin/hello", argv1, envp1);
-  char *const argv2[] = {NULL};
+  char *const argv2[] = {"--skip"};
   char *const envp2[] = {NULL};
-  context_uload(&pcb[1], "/bin/nterm", argv2, envp2);
+  context_uload(&pcb[1], "/bin/pal", argv2, envp2);
+  context_uload(&pcb[2], "/bin/bird", argv1, envp1);
+  context_uload(&pcb[3], "/bin/nslider", argv1, envp1);
+  fg_pcb = &pcb[1];
   switch_boot_pcb();
   Log("Initializing processes...");
 }
@@ -42,14 +46,32 @@ Context *schedule(Context *prev)
   if (i < 20)
   {
     ++i;
-    current = &pcb[1];
+    current = fg_pcb;
   }
   else
   {
     i = 0;
-    current = (current == &pcb[1] ? &pcb[0] : &pcb[1]);
+    current = (current == fg_pcb ? &pcb[0] : fg_pcb);
   }
   return current->cp;
+}
+
+void reviseFG_PCB(int i)
+{
+  switch (i)
+  {
+  case 1:
+    fg_pcb = &pcb[1];
+    break;
+  case 2:
+    fg_pcb = &pcb[2];
+    break;
+  case 3:
+    fg_pcb = &pcb[3];
+    break;
+  default:
+    fg_pcb = &pcb[1];
+  }
 }
 
 void context_kload(PCB *pcb, void (*entry)(void *), void *arg)
