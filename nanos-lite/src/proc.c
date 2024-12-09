@@ -25,10 +25,12 @@ void hello_fun(void *arg)
 
 void init_proc()
 {
-  context_kload(&pcb[0], hello_fun, "ysxAshore");
-  char *const argv[] = {NULL};
-  char *const envp[] = {NULL};
-  context_uload(&pcb[1], "/bin/pal", argv, envp);
+  char *const argv1[] = {NULL};
+  char *const envp1[] = {NULL};
+  context_uload(&pcb[0], "/bin/hello", argv1, envp1);
+  char *const argv2[] = {NULL};
+  char *const envp2[] = {NULL};
+  context_uload(&pcb[1], "/bin/nterm", argv2, envp2);
   switch_boot_pcb();
   Log("Initializing processes...");
 }

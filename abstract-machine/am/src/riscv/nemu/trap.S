@@ -2,6 +2,9 @@
 #define concat(x, y) concat_temp(x, y)
 #define MAP(c, f) c(f)
 
+#define KERNEL 1
+#define USER 0
+
 #if __riscv_xlen == 32
 #define LOAD  lw
 #define STORE sw
@@ -31,15 +34,53 @@ f(30) f(31)
 #define PUSH(n) STORE concat(x, n), (n * XLEN)(sp);
 #define POP(n)  LOAD  concat(x, n), (n * XLEN)(sp);
 
-#define CONTEXT_SIZE  ((NR_REGS + 4) * XLEN)
+#define CONTEXT_SIZE  ((NR_REGS + 5) * XLEN)
 #define OFFSET_SP     ( 2 * XLEN)
 #define OFFSET_CAUSE  ((NR_REGS + 0) * XLEN)
 #define OFFSET_STATUS ((NR_REGS + 1) * XLEN)
 #define OFFSET_EPC    ((NR_REGS + 2) * XLEN)
+#define OFFSET_NP     ((NR_REGS + 3) * XLEN)
 
+
+.globl np
+np:
+  .space 4
 .align 3
 .globl __am_asm_trap
+
 __am_asm_trap:
+  csrrw sp,mscratch,sp //交换sp和mscratch的值
+  bnez sp,save_np_user
+  csrr sp,mscratch
+  
+save_np_kernel:
+  addi sp,sp,-2*XLEN //创建栈,保存使用到的寄存器
+  STORE t0,0(sp)
+  STORE t1,XLEN(sp)
+
+  lui t0,KERNEL
+  la t1,np
+  STORE t0,0(t1)
+
+  LOAD t0,0(sp)
+  LOAD t1,XLEN(sp)
+  addi sp,sp,2*XLEN
+  j save_context
+  
+save_np_user:
+  addi sp,sp,-2*XLEN //创建栈,保存使用到的寄存器
+  STORE t0,0(sp)
+  STORE t1,XLEN(sp)
+
+  lui t0,USER
+  la t1,np
+  STORE t0,0(t1)
+
+  LOAD t0,0(sp)
+  LOAD t1,XLEN(sp)
+  addi sp,sp,2*XLEN
+
+save_context:
   addi sp, sp, -CONTEXT_SIZE
 
   MAP(REGS, PUSH)
@@ -47,10 +88,18 @@ __am_asm_trap:
   csrr t0, mcause
   csrr t1, mstatus
   csrr t2, mepc
+  csrr t3, mscratch
 
   STORE t0, OFFSET_CAUSE(sp)
   STORE t1, OFFSET_STATUS(sp)
   STORE t2, OFFSET_EPC(sp)
+  STORE t3, OFFSET_SP(sp)
+
+  la t0,np
+  LOAD t0,0(t0)
+  STORE t0,OFFSET_NP(sp)
+
+  csrw mscratch,zero
 
   # set mstatus.MPRV to pass difftest
   li a0, (1 << 17)
@@ -66,7 +115,12 @@ __am_asm_trap:
   csrw mstatus, t1
   csrw mepc, t2
 
-  MAP(REGS, POP)
+  LOAD t1, OFFSET_NP(sp)
+  bnez t1, kernel_restore             //np是KERNEL,那么不需要恢复ksp，直接恢复sp
+  addi t2, sp, CONTEXT_SIZE           //ksp设置为sp
+  csrw mscratch,t2
 
-  addi sp, sp, CONTEXT_SIZE
+kernel_restore:
+  MAP(REGS, POP)
+  LOAD sp,OFFSET_SP(sp)
   mret
