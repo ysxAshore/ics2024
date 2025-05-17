@@ -34,7 +34,7 @@ typedef struct {
   } gpr[8];
 
   /* Do NOT change the order of the GPRs' definitions. */
-  uint32_t eax, ecx, edx, ebx, esp, ebp, esi, edi;
+  uint32_t *eax, *ecx, *edx, *ebx, *esp, *ebp, *esi, *edi;
 
   vaddr_t pc;
 } x86_CPU_state;
