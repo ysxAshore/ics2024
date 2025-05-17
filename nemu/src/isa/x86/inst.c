@@ -212,7 +212,7 @@ again:
 
   INSTPAT("1100 0110", mov,       I2E,  1, RMw(imm));
   INSTPAT("1100 0111", mov,       I2E,  0, RMw(imm));
-  INSTPAT("1100 1100", nemu_trap, N,    0, NEMUTRAP(s->pc, *cpu.eax));
+  INSTPAT("1100 1100", nemu_trap, N,    0, NEMUTRAP(s->pc, cpu.eax));
   INSTPAT("???? ????", inv,       N,    0, INV(s->pc));
   INSTPAT_END();
 

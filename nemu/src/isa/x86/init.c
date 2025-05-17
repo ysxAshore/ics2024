@@ -32,17 +32,6 @@ static const uint8_t img []  = {
 static void restart() {
   /* Set the initial instruction pointer. */
   cpu.pc = RESET_VECTOR;
-
-  cpu.eax = &cpu.gpr[0]._32;
-  cpu.edx = &cpu.gpr[1]._32;
-  cpu.ecx = &cpu.gpr[2]._32;
-  cpu.ebx = &cpu.gpr[3]._32;
-  cpu.ebp = &cpu.gpr[4]._32;
-  cpu.esi = &cpu.gpr[5]._32;
-  cpu.edi = &cpu.gpr[6]._32;
-  cpu.esp = &cpu.gpr[7]._32;
-
-
 }
 
 void init_isa() {
