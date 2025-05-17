@@ -39,6 +39,7 @@ typedef struct {
   vaddr_t pc;
 } x86_CPU_state;
 
+
 // decode
 typedef struct {
   uint8_t inst[16];
