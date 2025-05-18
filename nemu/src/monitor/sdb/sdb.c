@@ -75,12 +75,13 @@ static int cmd_q(char *args) {
 }
 
 static int cmd_info(char * args){
-	if(args == NULL){
+	char *arg = strtok(NULL," ");
+	if(arg == NULL){
 		printf("Unkown command,info must have one argument\n");
 	}else{
-		char *arg = strtok(NULL," ");
-		if(arg == NULL){
-			if(strcmp(args,"r") == 0)
+		char *tmp = strtok(NULL," ");
+		if(tmp == NULL){
+			if(strcmp(arg,"r") == 0)
 				isa_reg_display();
 		}else{
 			printf("Unkown command 'info %s',info must have one argument\n",args);
