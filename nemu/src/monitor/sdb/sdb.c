@@ -106,10 +106,13 @@ static int cmd_x(char *args){
 			if(strspn(arg,"0123456789abcdefx") == strlen(arg) && tmp == NULL){
 				paddr_t address;
 				sscanf(arg,"%x",&address);
-				for(int i = 0; i < N; i+=4){
-					printf("%#X:%#lX\n",address,paddr_read(address,4));
+				int i;
+				for(i = 0; i < N/4; ++i){
+					printf("%#x:%#lx\n",address,paddr_read(address,4));
 					address+=4;
 				}
+				if(i * 4 < N)
+					printf("%#x:%#lx\n",address,paddr_read(address,N - i * 4));
 			}else
 				printf("Unknown command 'x %s',the second argument must be a hex number\n",args);
 		}
