@@ -18,6 +18,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include "memory/paddr.h"
 
 static int is_batch_mode = false;
 
@@ -90,6 +91,32 @@ static int cmd_info(char * args){
 	return 0;
 }
 
+static int cmd_x(char *args){
+	if(args == NULL)
+		printf("Unknown command 'x',x must have two arguments\n");
+	else{
+		char * arg = strtok(NULL," ");
+		if(strspn(arg,"0123456789") != strlen(arg))
+			printf("Unknown command 'x %s',the first argument must be a number\n",args);
+		else{
+			uint64_t N;
+			sscanf(arg,"%ld",&N);
+			arg = strtok(NULL," ");
+			char *tmp = strtok(NULL," ");
+			if(strspn(arg,"0123456789abcdefx") == strlen(arg) && tmp == NULL){
+				paddr_t address;
+				sscanf(arg,"%x",&address);
+				for(int i = 0; i < N; i+=4){
+					printf("%#X:%#lX\n",address,paddr_read(address,4));
+					address+=4;
+				}
+			}else
+				printf("Unknown command 'x %s',the second argument must be a hex number\n",args);
+		}
+	}
+	return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -102,6 +129,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si", "Excute cpu n steps", cmd_si },
   { "info", "Print the information which prefered by args", cmd_info },
+  { "x", "print the N elements in memory that begin with address", cmd_x},
   /* TODO: Add more commands */
 
 };
