@@ -43,15 +43,50 @@ static char* rl_gets() {
 }
 
 static int cmd_c(char *args) {
-  cpu_exec(-1);
+  if(args == NULL)
+	cpu_exec(-1);
+  else
+	printf("Unkown command 'c %s',c must have zero argument\n",args);	
+	
   return 0;
 }
 
+static int cmd_si(char *args){
+	uint64_t n = 1;
+	if (args == NULL)
+		cpu_exec(1);
+	else{
+	 	if(strspn(args,"0123456789") == strlen(args)){ //判断args是否完全是数字
+			sscanf(args,"%ld",&n);
+			cpu_exec(n);
+	 	}else
+			printf("Unkown command 'si %s',si could have a num argument\n",args);	
+	} 
+	return 0;
+}
 
 static int cmd_q(char *args) {
-  nemu_state.state = NEMU_QUIT; 
-  cpu_exec(0);
+  if(args == NULL){
+	nemu_state.state = NEMU_QUIT; 
+	cpu_exec(0);
+  }else
+	printf("Unkown command 'q %s',q must have zero argument\n",args);	
   return -1;
+}
+
+static int cmd_info(char * args){
+	if(args == NULL){
+		printf("Unkown command,info must have one argument\n");
+	}else{
+		char *arg = strtok(NULL," ");
+		if(arg == NULL){
+			if(strcmp(args,"r") == 0)
+				isa_reg_display();
+		}else{
+			printf("Unkown command 'info %s',info must have one argument\n",args);
+		}
+	}
+	return 0;
 }
 
 static int cmd_help(char *args);
@@ -64,7 +99,8 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
+  { "si", "Excute cpu n steps", cmd_si },
+  { "info", "Print the information which prefered by args", cmd_info },
   /* TODO: Add more commands */
 
 };
@@ -83,8 +119,9 @@ static int cmd_help(char *args) {
     }
   }
   else {
+	char *tmp = strtok(NULL," ");
     for (i = 0; i < NR_CMD; i ++) {
-      if (strcmp(arg, cmd_table[i].name) == 0) {
+      if (strcmp(arg, cmd_table[i].name) == 0 && tmp == NULL) {
         printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
         return 0;
       }
