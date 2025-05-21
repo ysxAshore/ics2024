@@ -130,7 +130,7 @@ static int cmd_test(char *args){
 			char *ref_result = strtok(buf," ");
 			word_t ref_res;
 			sscanf(ref_result,"%lu",&ref_res);
-			char *ref_expr = strtok(" ","\n");
+			char *ref_expr = strtok(NULL,"\n");
 			bool success = true;
 			word_t myRes = expr(ref_expr,&success);
 			if(success){
