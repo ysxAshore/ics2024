@@ -39,7 +39,7 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
   {"==", TK_EQ},        // equal
-  {"\\d+", TK_DECNUM},  // decimal integer
+  {"[0-9]+", TK_DECNUM},  // decimal integer
   {"\\-", '-'},         // sub
   {"\\*", '*'},         // multiply 
   {"/", '/'},           // div
