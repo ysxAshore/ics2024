@@ -122,7 +122,7 @@ static int cmd_x(char *args){
 
 static int cmd_test(char *args){
 	if(args == NULL){
-		FILE * f = fopen("tools/gen_expr/build/input.txt","r");
+		FILE * f = fopen("tools/gen-expr/build/input.txt","r");
 		assert(f != NULL);
 		char buf[65600];
 		while(fgets(buf,sizeof(buf),f)!=NULL){
