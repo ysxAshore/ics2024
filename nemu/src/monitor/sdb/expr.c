@@ -47,7 +47,7 @@ static struct rule {
   {"\\(", '('},         // left brace
   {"\\)", ')'},         // right brace
   {"&&", TK_AND},       // and op
-  {"$[0-9a-z]{1,3}",TK_REG},     // register name
+  {"\\$[0-9a-z]{1,3}",TK_REG},     // register name
   {"0x[0-9a-fA-F]+",TK_HEXNUM},  // hex number
 };
 
