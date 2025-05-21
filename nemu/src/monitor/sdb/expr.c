@@ -19,12 +19,12 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include <memory/paddr.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,TK_DECNUM,TK_POS,TK_NEG
-
+  TK_NOTYPE = 256, TK_EQ,TK_NOTEQ,TK_DECNUM,TK_POS,TK_NEG,
+  TK_AND,TK_REG,TK_HEXNUM,TK_REF
   /* TODO: Add more token types */
-
 };
 
 static struct rule {
@@ -39,12 +39,16 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
   {"==", TK_EQ},        // equal
-  {"[0-9]+", TK_DECNUM},  // decimal integer
+  {"!=", TK_NOTEQ},	    // not equal 
+  {"[0-9]+", TK_DECNUM},// decimal integer
   {"\\-", '-'},         // sub
   {"\\*", '*'},         // multiply 
   {"/", '/'},           // div
   {"\\(", '('},         // left brace
   {"\\)", ')'},         // right brace
+  {"&&", TK_AND},       // and op
+  {"$[0-9a-z]{1,3}",TK_REG},     // register name
+  {"0x[0-9a-fA-F]+",TK_HEXNUM},  // hex number
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -150,6 +154,28 @@ static bool make_token(char *e) {
 				tokens[nr_token].str[0] = '\0';
 				++nr_token;
 				break;
+			case TK_NOTEQ:
+				tokens[nr_token].type = TK_NOTEQ;
+				tokens[nr_token].str[0] = '\0';
+				++nr_token;
+				break;
+			case TK_AND:
+				tokens[nr_token].type = TK_AND;
+				tokens[nr_token].str[0] = '\0';
+				++nr_token;
+				break;
+			case TK_REG:
+				tokens[nr_token].type = TK_REG;
+				strncpy(tokens[nr_token].str,substr_start+1,substr_len-1);//去除$字符
+				tokens[nr_token].str[substr_len-1] = '\0';
+				++nr_token;
+				break;
+			case TK_HEXNUM:
+				tokens[nr_token].type = TK_HEXNUM;
+				strncpy(tokens[nr_token].str,substr_start,substr_len);//去除$字符
+				tokens[nr_token].str[substr_len] = '\0';
+				++nr_token;
+				break;
           default: TODO();
         }
 
@@ -241,7 +267,24 @@ word_t eval(int p,int q){
 		return 0;
 	else if(p == q){
 		word_t num;
-		sscanf(tokens[p].str,"%ld",&num);
+		switch(tokens[p].type){
+			case TK_DECNUM:
+				sscanf(tokens[p].str,"%ld",&num);
+				break;
+			case TK_HEXNUM:
+				sscanf(tokens[p].str,"0x%lx",&num);
+				break;
+			case TK_REG:
+				bool success = true;
+				if(strcmp(tokens[p].str,"0")==0)
+					return 0;
+				num = isa_reg_str2val(tokens[p].str,&success);
+				if(!success){
+					printf("unknown register name %s\n",tokens[p].str);
+					error = 1;
+				}
+				break;
+		}
 		return num;
 	}else if(check_parentheses(p,q))
 		return eval(p+1,q-1);
@@ -256,6 +299,10 @@ word_t eval(int p,int q){
 			case '/' : return a / b;
 			case TK_POS: return b;
 			case TK_NEG: return -1 * b;
+			case TK_AND: return a && b;
+			case TK_EQ: return a == b;
+			case TK_NOTEQ: return a != b;
+			case TK_REF: return paddr_read(b,sizeof(uint32_t));
 			default: return 0;
 		}
 	}
@@ -268,10 +315,12 @@ word_t expr(char *e, bool *success) {
   }
 
   for(int i = 0; i < nr_token; ++i){
-	  if(tokens[i].type == '+' && (i == 0 || (tokens[i-1].type != ')' && tokens[i-1].type != TK_DECNUM)))
+	  if(tokens[i].type == '+' && (i == 0 || (tokens[i-1].type != ')' && tokens[i-1].type != TK_DECNUM && tokens[i-1].type != TK_HEXNUM)))
 		  tokens[i].type = TK_POS;
-	  if(tokens[i].type == '-' && (i == 0 || (tokens[i-1].type != ')' && tokens[i-1].type != TK_DECNUM)))
+	  if(tokens[i].type == '-' && (i == 0 || (tokens[i-1].type != ')' && tokens[i-1].type != TK_DECNUM && tokens[i-1].type != TK_HEXNUM)))
 		  tokens[i].type = TK_NEG;	
+	  if(tokens[i].type == '*' && (i == 0 || (tokens[i-1].type != ')' && tokens[i-1].type != TK_DECNUM && tokens[i-1].type != TK_HEXNUM)))
+		  tokens[i].type = TK_REF;	
   }
 
   /* TODO: Insert codes to evaluate the expression. */
