@@ -219,20 +219,22 @@ bool check_parentheses(int p,int q){
 
 // 定义运算符优先级
 int precedence(int op) {
-    if (op == '+' || op == '-') return 1;
-    if (op == '*' || op == '/') return 2;
-    if (op == TK_POS || op == TK_NEG) return 3;
+	if (op == TK_AND) return 1;
+	if (op == TK_EQ || op == TK_NOTEQ) return 2;
+    if (op == '+' || op == '-') return 3;
+    if (op == '*' || op == '/') return 4;
+    if (op == TK_POS || op == TK_NEG || op == TK_REF) return 5;
     return 0;
 }
 
 // 检查是否为运算符
 int is_operator(int c) {
-    return c == '+' || c == '-' || c == '*' || c == '/' || c == TK_POS || c == TK_NEG;
+    return c == '+' || c == '-' || c == '*' || c == '/' || c == TK_POS || c == TK_NEG || c == TK_EQ || c== TK_NOTEQ || c == TK_AND || c == TK_REF;
 }
 
 int find_main_operator(int p, int q) {
     int main_op = -1;
-    int min_precedence = 4; // 初始化为一个未使用的较大的值
+    int min_precedence = 6; // 初始化为一个未使用的较大的值
 
     // 用于计算括号内的表达式的栈
     int* paren_stack = (int*)malloc(sizeof(int) * nr_token);
