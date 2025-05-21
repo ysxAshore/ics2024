@@ -126,7 +126,6 @@ static int cmd_test(char *args){
 		assert(f != NULL);
 		char buf[65600];
 		while(fgets(buf,sizeof(buf),f)!=NULL){
-			printf("%s\n",buf);
 			char *ref_result = strtok(buf," ");
 			word_t ref_res;
 			sscanf(ref_result,"%lu",&ref_res);
