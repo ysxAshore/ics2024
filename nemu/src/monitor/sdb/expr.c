@@ -248,7 +248,7 @@ word_t eval(int p,int q){
 	else{
 		int mainOp = find_main_operator(p,q);
 		word_t a = eval(p,mainOp - 1);
-		word_t b = eval(p,mainOp + 1);
+		word_t b = eval(mainOp + 1,q);
 		switch(mainOp){
 			case '+' : return a + b;
 			case '-' : return a - b;
