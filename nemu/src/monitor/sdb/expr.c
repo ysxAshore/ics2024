@@ -175,9 +175,9 @@ bool check_parentheses(int p,int q){
 	else{
 		int eq = 1;
 		for (int i = p + 1; i <= q; ++i){
-			if(tokens[p].type == '(')
+			if(tokens[i].type == '(')
 				++eq;
-			if(tokens[p].type == ')')
+			if(tokens[i].type == ')')
 				--eq;
 			if(eq < 0){
 				error = 1;
