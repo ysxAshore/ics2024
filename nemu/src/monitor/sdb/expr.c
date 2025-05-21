@@ -21,7 +21,7 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
+  TK_NOTYPE = 256, TK_EQ,TK_DECNUM,TK_POS,TK_NEG
 
   /* TODO: Add more token types */
 
@@ -39,6 +39,12 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
   {"==", TK_EQ},        // equal
+  {"[\\+\\-]?\\d+", TK_DECNUM},  // decimal integer
+  {"\\-", '-'},         // sub
+  {"\\*", '*'},         // multiply 
+  {"/", '/'},           // div
+  {"\\(", '('},         // left brace
+  {"\\)", ')'},         // right brace
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -65,10 +71,12 @@ void init_regex() {
 typedef struct token {
   int type;
   char str[32];
-} Token;
+} Token; 
 
-static Token tokens[32] __attribute__((used)) = {};
+static Token tokens[256] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
+
+#define TOKEN_STRLEN ARRLEN(tokens[0].str)
 
 static bool make_token(char *e) {
   int position = 0;
@@ -95,6 +103,53 @@ static bool make_token(char *e) {
          */
 
         switch (rules[i].token_type) {
+			case TK_NOTYPE: //if it is brace ,ignore it
+				break;
+			case '+':
+				tokens[nr_token].type = '+';
+				tokens[nr_token].str[0] = '\0';
+				++nr_token;
+				break;
+			case TK_EQ:
+				tokens[nr_token].type = TK_EQ;	
+				tokens[nr_token].str[0] = '\0';
+				++nr_token;
+				break;
+			case TK_DECNUM:
+				tokens[nr_token].type = TK_DECNUM;
+				if (substr_len > TOKEN_STRLEN){
+					printf("the num %.*s is so big\n", substr_len, substr_start);
+					return false;
+				} 
+				strncpy(tokens[nr_token].str,substr_start,substr_len);
+				tokens[nr_token].str[substr_len] = '\0';
+				++nr_token;
+				break;
+			case '-':
+				tokens[nr_token].type = '-';
+				tokens[nr_token].str[0] = '\0';
+				++nr_token;
+				break;
+			case '*':
+				tokens[nr_token].type = '*';
+				tokens[nr_token].str[0] = '\0';
+				++nr_token;
+				break;
+			case '/':
+				tokens[nr_token].type = '/';
+				tokens[nr_token].str[0] = '\0';
+				++nr_token;
+				break;
+			case '(':
+				tokens[nr_token].type = '(';
+				tokens[nr_token].str[0] = '\0';
+				++nr_token;
+				break;
+			case ')':
+				tokens[nr_token].type = ')';
+				tokens[nr_token].str[0] = '\0';
+				++nr_token;
+				break;
           default: TODO();
         }
 
@@ -111,6 +166,100 @@ static bool make_token(char *e) {
   return true;
 }
 
+static int error = 0;
+bool check_parentheses(int p,int q){
+	// use stack method 
+	// encouter a left brace, ++eq, a right brace --eq
+	if(tokens[p].type != '(')
+		return false;
+	else{
+		int eq = 1;
+		for (int i = p + 1; i <= q; ++i){
+			if(tokens[p].type == '(')
+				++eq;
+			if(tokens[p].type == ')')
+				--eq;
+			if(eq < 0){
+				error = 1;
+				return false;
+			}else if(eq == 0 && i != q) //the left brace which refered by p has encoutered the right brace before q 
+				return false;
+		}
+		if (eq == 0)
+			return true;
+		return false;
+	}
+}
+
+// 定义运算符优先级
+int precedence(int op) {
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    if (op == TK_POS || op == TK_NEG) return 3;
+    return 0;
+}
+
+// 检查是否为运算符
+int is_operator(int c) {
+    return c == '+' || c == '-' || c == '*' || c == '/' || c == TK_POS || c == TK_NEG;
+}
+
+int find_main_operator(int p, int q) {
+    int main_op = -1;
+    int min_precedence = 4; // 初始化为一个未使用的较大的值
+
+    // 用于计算括号内的表达式的栈
+    int* paren_stack = (int*)malloc(sizeof(int) * nr_token);
+    int stack_size = 0;
+
+    for (int i = p; i <= q; i++) {
+        int type = tokens[i].type;
+        if (type == '(') {
+            // 遇到左括号，记录位置
+            paren_stack[stack_size++] = i;
+        } else if (type == ')') {
+            // 遇到右括号，弹出栈
+            if (stack_size > 0) {
+                --stack_size;
+            }
+        } else if (is_operator(type) && stack_size == 0) {
+            // 只考虑顶层（栈为空时）的运算符
+            int op_precedence = precedence(type);
+            if (op_precedence <= min_precedence && !(min_precedence == 3 && op_precedence == 3)) { //除正负号外多个相同优先级运算符时 根据结合律取最右侧的
+                min_precedence = op_precedence;
+                main_op = i;
+            }
+        }
+    }
+
+    free(paren_stack);
+    return main_op;
+}
+
+word_t eval(int p,int q){
+	if(p > q)
+		return 0;
+	else if(p == q){
+		word_t num;
+		sscanf(tokens[p].str,"%ld",&num);
+		return num;
+	}else if(check_parentheses(p,q))
+		return eval(p+1,q-1);
+	else{
+		int mainOp = find_main_operator(p,q);
+		word_t a = eval(p,mainOp - 1);
+		word_t b = eval(p,mainOp + 1);
+		switch(mainOp){
+			case '+' : return a + b;
+			case '-' : return a - b;
+			case '*' : return a * b;
+			case '/' : return a / b;
+			case TK_POS: return b;
+			case TK_NEG: return -1 * b;
+			default: return 0;
+		}
+	}
+}
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
@@ -118,8 +267,18 @@ word_t expr(char *e, bool *success) {
     return 0;
   }
 
-  /* TODO: Insert codes to evaluate the expression. */
-  TODO();
+  for(int i = 0; i < nr_token; ++i){
+	  if(tokens[i].type == '+' && (i == 0 || (tokens[i-1].type != ')' && tokens[i-1].type != TK_DECNUM)))
+		  tokens[i].type = TK_POS;
+	  if(tokens[i].type == '-' && (i == 0 || (tokens[i-1].type != ')' && tokens[i-1].type != TK_DECNUM)))
+		  tokens[i].type = TK_NEG;	
+  }
 
-  return 0;
+  /* TODO: Insert codes to evaluate the expression. */
+  error = 0;
+  if(error == 1){
+    *success = false;
+    return 0;
+  }
+  return eval(0,nr_token-1);
 }

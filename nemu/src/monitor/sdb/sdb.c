@@ -120,6 +120,32 @@ static int cmd_x(char *args){
 	return 0;
 }
 
+static int cmd_test(char *args){
+	if(args == NULL){
+		FILE * f = fopen("tools/gen_expr/build/input.txt","r");
+		assert(f != NULL);
+		char buf[65600];
+		while(fgets(buf,sizeof(buf),f)!=NULL){
+			char *ref_result = strtok(buf," ");
+			word_t ref_res;
+			sscanf(ref_result,"%lu",&ref_res);
+			char *ref_expr = strtok(" ","\n");
+			bool success = true;
+			word_t myRes = expr(ref_expr,&success);
+			if(success){
+				if(myRes == ref_res){
+					printf("%s==%s\n success",ref_expr,ref_result);
+				}else{
+					printf("%s==%s\n failed",ref_expr,ref_result);	
+				}
+			}else
+				printf("token failed\n");
+		}		
+	}else
+		printf("Unknown command 'test %s',test must have no argument\n",args);
+	return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -133,6 +159,7 @@ static struct {
   { "si", "Excute cpu n steps", cmd_si },
   { "info", "Print the information which prefered by args", cmd_info },
   { "x", "print the N elements in memory that begin with address", cmd_x},
+  { "test", "test the expr function", cmd_test},
   /* TODO: Add more commands */
 
 };
