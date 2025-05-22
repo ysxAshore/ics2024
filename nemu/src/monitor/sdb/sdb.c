@@ -153,7 +153,7 @@ static int cmd_expr(char *args){
 		bool success = true;
 		word_t val = expr(args,&success);
 		if(success)
-			printf("0%lx\n",val);
+			printf("%0lx\n",val);
 		else
 			printf("The %s expression evals failed\n",args);
 	}
