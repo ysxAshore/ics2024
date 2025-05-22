@@ -292,8 +292,9 @@ word_t eval(int p,int q){
 		return eval(p+1,q-1);
 	else{
 		int mainOp = find_main_operator(p,q);
-		word_t a = eval(p,mainOp - 1);
-		word_t b = eval(mainOp + 1,q);
+		//中间值a和b 如果使用无符号类型 那么对于负值会变成极大值 影响计算结果
+		MUXDEF(CONFIG_ISA64,long,int) a = eval(p,mainOp - 1);
+		MUXDEF(CONFIG_ISA64,long,int) b = eval(mainOp + 1,q);
 		switch(mainOp){
 			case '+' : return a + b;
 			case '-' : return a - b;
