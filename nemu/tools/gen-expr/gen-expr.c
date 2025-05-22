@@ -25,9 +25,10 @@ static char buf[65536] = {'\0'};
 static char code_buf[65536 + 128] = {'\0'}; // a little larger than `buf`
 static char *code_format =
 "#include <stdio.h>\n"
+"#include <stdint.h>\n"
 "int main() { "
-"  unsigned result = %s; "
-"  printf(\"%%u\", result); "
+"  uint64_t result = %s; "
+"  printf(\"%%lu\", result); "
 "  return 0; "
 "}";
 
@@ -118,7 +119,7 @@ int main(int argc, char *argv[]) {
   for (i = 0; i < loop; i ++) {
     position = 0;
     gen_rand_expr();
-	if(position >= 65536){
+	if(position >= 1024){
 		--i;
 		continue;
 	}
@@ -137,9 +138,9 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
+    int ret = system("gcc -Wall -Werror /tmp/.code.c -o /tmp/.expr");
     if (ret != 0) {
-        --i;
+		--i;
         continue;
     }
 
@@ -147,11 +148,11 @@ int main(int argc, char *argv[]) {
     fp = popen("/tmp/.expr", "r");
     assert(fp != NULL);
 
-    int result;
-    ret = fscanf(fp, "%d", &result);
+    uint64_t result;
+    ret = fscanf(fp, "%lu", &result);
     pclose(fp);
 
-    printf("%u %s\n", result, buf);
+    printf("%lu %s\n", result, buf);
   }
   return 0;
 }
