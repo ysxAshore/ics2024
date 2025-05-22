@@ -41,8 +41,10 @@ void init_wp_pool() {
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
   }
 
-  head = NULL;
-  free_ = wp_pool;
+  head = calloc(1,sizeof(WP));
+  head->next = NULL;
+  free_ = calloc(1,sizeof(WP));
+  free_->next = wp_pool;
 }
 
 /* TODO: Implement the functionality of watchpoint */
