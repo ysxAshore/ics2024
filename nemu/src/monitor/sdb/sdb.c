@@ -181,6 +181,15 @@ static int cmd_d(char *args){
 	return 0;
 }
 
+static int cmd_w(char *args){
+	if(args == NULL)
+		printf("the command w needs a parameter reprented the expression watched\n");
+	else{
+		createWatchPoint(args);
+	}
+	return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -197,6 +206,7 @@ static struct {
   { "test", "test the expr function", cmd_test},
   { "expr",	"get the expr value", cmd_expr},
   { "d", "delete the Number N watchpoint", cmd_d},
+  { "w", "add a watchpoint,the argument refers the expression",cmd_w},
   /* TODO: Add more commands */
 
 };
