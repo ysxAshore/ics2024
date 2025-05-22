@@ -22,11 +22,17 @@ typedef struct watchpoint {
   struct watchpoint *next;
 
   /* TODO: Add more members if necessary */
-
+  /* watchpoint find the record expression value change,output it
+	 so needs the watchpoint expression and the current value*/
+  char * expression;
+  word_t value;
 } WP;
 
 static WP wp_pool[NR_WP] = {};
-static WP *head = NULL, *free_ = NULL;
+//head: record the has traced the expression
+//tail: record the free watchpoint
+//both with the header pointer list
+static WP *head = NULL, *free_ = NULL; 
 
 void init_wp_pool() {
   int i;
@@ -40,4 +46,74 @@ void init_wp_pool() {
 }
 
 /* TODO: Implement the functionality of watchpoint */
+WP * new_wp(){
+	if(free_->next == NULL){
+		printf("No entry for use\n");
+		return NULL;
+	}else{
+		WP * wp = free_->next;
+		free_->next = wp->next;
+		wp->next = head->next;
+		head->next = wp;
+		return wp;
+	}
+}
 
+void free_wp(WP * wp){
+	if(wp == NULL)
+		return;
+	WP * p = head;
+	while(p->next){
+		if (p->next == wp)
+			break;
+		p = p->next;
+	}
+	p->next = wp->next;
+	wp->next = free_->next;
+	free_->next = wp;
+}
+
+void createWatchPoint(char *args){
+	WP * wp = new_wp();
+	word_t value;
+	bool sign = true;
+	value = expr(args,&sign);
+	if(wp != NULL && sign){
+		wp->expression = (char*)calloc(strlen(args)+1,sizeof(char));
+		strcpy(wp->expression,args);
+		wp->value = value;
+		printf("The %d watch has created,%s = %lx\n", wp->NO, wp->expression, wp->value);
+	}
+}
+
+void checkWatchPoint(){
+	WP * p = head->next;
+	while(p){
+		bool sign = true;
+		word_t value = expr(p->expression,&sign);
+		if(sign && value != p->value){
+			printf("The %d watch watches the expression %s has changed,from %lx to %lx\n", p->NO, p->expression, p->value, value);
+			p->value = value;
+			nemu_state.state = NEMU_STOP; //暂停
+		}
+		p = p->next;
+	}
+}
+
+void displayWatchPoint(){
+	WP * p = head->next;
+	while(p){
+		printf("The %d watch is %s = %lx\n", p->NO, p->expression, p->value);
+		p = p->next;
+	}
+}
+
+void deleteWatchPoint(int NO){
+	WP * p = head->next;
+	while(p){
+		if(p->NO == NO)
+			break;
+		p = p->next;
+	}
+	free_wp(p);
+}

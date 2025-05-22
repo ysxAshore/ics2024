@@ -84,6 +84,8 @@ static int cmd_info(char * args){
 		if(tmp == NULL){
 			if(strcmp(arg,"r") == 0)
 				isa_reg_display();
+			if(strcmp(arg,"w") == 0)
+				displayWatchPoint();
 		}else{
 			printf("Unkown command 'info %s',info must have one argument\n",args);
 		}
@@ -160,6 +162,25 @@ static int cmd_expr(char *args){
 	return 0;
 }
 
+static int cmd_d(char *args){
+	if(args == NULL)
+		printf("the command d needs a parameter reprented the WatchPoint Number\n");
+	else{
+		char * number = strtok(NULL," ");
+		char * temp = strtok(NULL," ");
+		if(temp == NULL){
+			int N;
+			int tag = sscanf(number,"%d",&N);	
+			if(tag == 0 || tag == EOF)
+				printf("the %s must be a integer\n",args);	
+			else
+				deleteWatchPoint(N);	
+		}else
+			printf("the %s must be only a parameter\n",args);	
+	}
+	return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -171,10 +192,11 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   { "si", "Excute cpu n steps", cmd_si },
-  { "info", "Print the information which prefered by args", cmd_info },
+  { "info", "Print the information which prefered by args,supported r and w", cmd_info },
   { "x", "print the N elements in memory that begin with address", cmd_x},
   { "test", "test the expr function", cmd_test},
   { "expr",	"get the expr value", cmd_expr},
+  { "d", "delete the Number N watchpoint", cmd_d},
   /* TODO: Add more commands */
 
 };
