@@ -121,7 +121,7 @@ static int cmd_x(char *args){
 }
 
 static int cmd_test(char *args){
-	if(args == NULL){
+	if(args == NULL){ 
 		FILE * f = fopen("tools/gen-expr/build/input.txt","r");
 		assert(f != NULL);
 		char buf[65600];
@@ -132,7 +132,7 @@ static int cmd_test(char *args){
 			char *ref_expr = strtok(NULL,"\n");
 			bool success = true;
 			word_t myRes = expr(ref_expr,&success);
-			if(success){
+			if(success) {
 				if(myRes == ref_res){
 					printf("%s==%s\n success",ref_expr,ref_result);
 				}else{
@@ -143,6 +143,20 @@ static int cmd_test(char *args){
 		}		
 	}else
 		printf("Unknown command 'test %s',test must have no argument\n",args);
+	return 0;
+}
+
+static int cmd_expr(char *args){
+	if(args == NULL){
+		printf("Unknown command 'expr %s',test must have no argument\n",args);
+	}else{
+		bool success = true;
+		word_t val = expr(args,&success);
+		if(success)
+			printf("%ld\n",val);
+		else
+			printf("The %s expression evals failed\n",args);
+	}
 	return 0;
 }
 
@@ -160,6 +174,7 @@ static struct {
   { "info", "Print the information which prefered by args", cmd_info },
   { "x", "print the N elements in memory that begin with address", cmd_x},
   { "test", "test the expr function", cmd_test},
+  { "expr",	"get the expr value", cmd_expr},
   /* TODO: Add more commands */
 
 };
