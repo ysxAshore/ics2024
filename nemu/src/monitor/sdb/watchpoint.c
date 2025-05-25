@@ -85,7 +85,8 @@ void createWatchPoint(char *args){
 		strcpy(wp->expression,args);
 		wp->value = value;
 		printf("The %d watch has created,%s = %lx\n", wp->NO, wp->expression, wp->value);
-	}
+	}else
+	        printf("The %s watch creates failed\n", wp->expression);
 }
 
 void checkWatchPoint(){
