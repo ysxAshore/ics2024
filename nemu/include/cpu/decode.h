@@ -20,9 +20,9 @@
 
 typedef struct Decode {
   vaddr_t pc;
-  vaddr_t snpc; // static next pc
-  vaddr_t dnpc; // dynamic next pc
-  ISADecodeInfo isa;
+  vaddr_t snpc; // static next pc:pc+4
+  vaddr_t dnpc; // dynamic next pc: consider the branch inst 
+  ISADecodeInfo isa; //now only has a entry: inst
   IFDEF(CONFIG_ITRACE, char logbuf[128]);
 } Decode;
 
