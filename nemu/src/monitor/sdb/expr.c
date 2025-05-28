@@ -48,7 +48,7 @@ static struct rule {
   {"\\)", ')'},         // right brace
   {"&&", TK_AND},       // and op
   {"\\$[0-9a-z]{1,3}",TK_REG},     // register name
-  {"0[xX][0-9a-fA-F]+",TK_HEXNUM},  // hex number
+  {"0x[0-9a-fA-F]+",TK_HEXNUM},  // hex number
 };
 
 #define NR_REGEX ARRLEN(rules)
