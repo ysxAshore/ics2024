@@ -40,6 +40,7 @@ static struct rule {
   {"\\+", '+'},         // plus
   {"==", TK_EQ},        // equal
   {"!=", TK_NOTEQ},	    // not equal 
+  {"0[xX][0-9a-fA-F]+",TK_HEXNUM},  // hex number 需要在TK_DEXNUM前不然会把0当做decimal integer
   {"[0-9]+", TK_DECNUM},// decimal integer
   {"\\-", '-'},         // sub
   {"\\*", '*'},         // multiply 
@@ -48,7 +49,6 @@ static struct rule {
   {"\\)", ')'},         // right brace
   {"&&", TK_AND},       // and op
   {"\\$[0-9a-z]{1,3}",TK_REG},     // register name
-  {"0x[0-9a-fA-F]+",TK_HEXNUM},  // hex number
 };
 
 #define NR_REGEX ARRLEN(rules)
