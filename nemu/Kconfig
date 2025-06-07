@@ -151,6 +151,11 @@ config ITRACE_COND
   string "Only trace instructions when the condition is true"
   default "true"
 
+config MTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "Enable memory read or write tracer"
+  default n
+
 config WATCHPOINT
   bool "Enable the debug funtion--watchPoint"
   default y
