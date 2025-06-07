@@ -34,6 +34,7 @@ static bool g_print_step = false;
 
 void device_update();
 void checkWatchPoint();
+void printFtrace();
 
 void printIringBuf(){
 	int errorIndex = header - 1 < 0 ? MAX_INST_TO_PRINT - 1 : header - 1; 
@@ -141,6 +142,7 @@ void cpu_exec(uint64_t n) {
 	  if(nemu_state.halt_ret != 0)
 		printIringBuf();
 	  #endif
+	  printFtrace();
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
