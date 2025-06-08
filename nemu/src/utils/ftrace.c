@@ -151,6 +151,7 @@ void printFtrace(){
 		            free(node);
 		        }else{
 		            printf("(tail call---");
+		            node = node->next;
 		            while(node){
 		                if(node->func == p->jFuncName){
 		                    printf("ret %s)\n",p->jFuncName);
@@ -185,6 +186,7 @@ void printFtrace(){
 			if(stack->next){
 			    node = stack->next;
 			    q = (CallStack *)malloc(sizeof(CallStack));
+			    //当上一次的call地址函数和当前调用call的函数并不相符时，需要插入一个call orginName
 			    if(node->func != p->orginName){
 			        q->func = p->orginName;
 			        q->next = stack->next;

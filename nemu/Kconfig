@@ -156,6 +156,11 @@ config MTRACE
   bool "Enable memory read or write tracer"
   default n
 
+config FTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "Enable the funcation call and return trace"
+  default n
+
 config WATCHPOINT
   bool "Enable the debug funtion--watchPoint"
   default y

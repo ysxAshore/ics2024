@@ -142,7 +142,7 @@ void cpu_exec(uint64_t n) {
 	  if(nemu_state.halt_ret != 0)
 		printIringBuf();
 	  #endif
-	  printFtrace();
+	  IFDEF(CONFIG_FTRACE,printFtrace());
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
