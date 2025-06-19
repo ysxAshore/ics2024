@@ -114,7 +114,7 @@ void init_monitor(int argc, char *argv[]) {
   init_log(log_file);
 
   /* Open the log file. */
-  init_symTable(elf_file);
+  IFDEF(CONFIG_FTRACE,init_symTable(elf_file));
 
   /* Initialize memory. */
   init_mem();
