@@ -45,13 +45,11 @@ static void audio_callback(void *userdata, Uint8 *stream, int len)
   {
     SDL_MixAudio(stream, sbuf + sbuf_point, CONFIG_SB_SIZE - sbuf_point, SDL_MIX_MAXVOLUME);
     SDL_MixAudio(stream + CONFIG_SB_SIZE - sbuf_point, sbuf, size - CONFIG_SB_SIZE + sbuf_point, SDL_MIX_MAXVOLUME);
-    sbuf_point = size - CONFIG_SB_SIZE + sbuf_point;
   }
   else
-  {
     SDL_MixAudio(stream, sbuf + sbuf_point, size, SDL_MIX_MAXVOLUME);
-    sbuf_point = sbuf_point + size;
-  }
+
+  sbuf_point = (sbuf_point + size) % CONFIG_SB_SIZE;
   audio_base[reg_count] -= size;
 }
 
