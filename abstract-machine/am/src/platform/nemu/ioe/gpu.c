@@ -28,25 +28,21 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg)
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl)
 {
   uint32_t data = inl(VGACTL_ADDR);
-  uint32_t screen_w = data >> 16;
-  uint32_t screen_h = data & 0xffff;
+  uint32_t screen_width = data >> 16;
+  uint32_t screen_height = data & 0xffff;
+  uint32_t *pixels = (uint32_t *)ctl->pixels;
+  uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;
 
-  uint32_t begin = 0;
-  uint32_t current = 0;
-  for (int i = 0; i < ctl->h && ctl->y + i < screen_h; i++)
+  uintptr_t begin = 0;
+  for (int i = 0; i < ctl->h && ctl->y + i < screen_height; ++i)
   {
-    begin = (ctl->y + i) * screen_w + ctl->x;
-    for (int j = 0; j < ctl->w && ctl->x + j < screen_w; j++)
-    {
-      current = i * ctl->w + j;
-      uint32_t data = *((uint32_t *)ctl->pixels + current);
-      outl(FB_ADDR + 4 * (begin + j), data);
-    }
+    begin = (ctl->y + i) * screen_width + ctl->x;
+    for (int j = 0; j < ctl->w && ctl->x + j < screen_width; ++j)
+      *(fb + begin + j) = *(pixels + i * ctl->w + j);
   }
+
   if (ctl->sync)
-  {
     outl(SYNC_ADDR, 1);
-  }
 }
 
 void __am_gpu_status(AM_GPU_STATUS_T *status)
