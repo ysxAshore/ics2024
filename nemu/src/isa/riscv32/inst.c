@@ -70,6 +70,7 @@ enum
   } while (0)
 
 void insertFtraceNode(int callType, vaddr_t from_pc, vaddr_t to_pc);
+void difftest_skip_ref();
 
 static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_t *imm, int type)
 {
@@ -156,6 +157,81 @@ void insertFtrace(int rd, word_t imm, int rs1, word_t pc, word_t dnpc)
   else if (rd == 0 && imm == 0 && rs1 == 1)
     insertFtraceNode(1, pc, dnpc);
 #endif
+}
+
+void csrrw_execute(word_t src1, word_t imm, int rd)
+{
+  switch (imm)
+  {
+  case 0x300:
+    R(rd) = cpu.mstatus;
+    cpu.mstatus = src1;
+    break;
+  case 0x305:
+    R(rd) = cpu.mtvec;
+    cpu.mtvec = src1;
+    break;
+  case 0x341:
+    R(rd) = cpu.mepc;
+    cpu.mepc = src1;
+    break;
+  case 0x342:
+    R(rd) = cpu.mcause;
+    cpu.mcause = src1;
+    break;
+  default:
+    panic("The " FMT_WORD " csr not implemented", imm);
+    break;
+  }
+}
+
+void csrrs_execute(word_t src1, word_t imm, int rd)
+{
+  switch (imm)
+  {
+  case 0x300:
+    R(rd) = cpu.mstatus;
+    cpu.mstatus |= src1;
+    break;
+  case 0x305:
+    R(rd) = cpu.mtvec;
+    cpu.mtvec |= src1;
+    break;
+  case 0x341:
+    R(rd) = cpu.mepc;
+    cpu.mepc |= src1;
+    break;
+  case 0x342:
+    R(rd) = cpu.mcause;
+    cpu.mcause |= src1;
+    break;
+  default:
+    panic("The " FMT_WORD " csr not implemented", imm);
+    break;
+  }
+}
+
+word_t ecallFunction(word_t epc) // riscv32中保存的是自陷指令的pc
+{
+  bool success = true; // 失败时才会设置false
+  word_t no;
+#ifdef __riscv_e
+  no = isa_reg_str2val("a5", &success);
+#else
+  no = isa_reg_str2val("a7", &success);
+#endif
+  Assert(success, "The reg not is recognized!");
+  return isa_raise_intr(no, epc);
+}
+
+word_t mretFunction()
+{
+  if (cpu.mcause == 0xb)
+  {
+    IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());
+    return cpu.mepc + 0x4;
+  }
+  return cpu.mepc;
 }
 
 static int decode_exec(Decode *s)
@@ -247,6 +323,11 @@ static int decode_exec(Decode *s)
   INSTPAT("??????? ????? ????? 000 ????? 11001 11", jalr, I, s->dnpc = (src1 + imm) & ~1, R(rd) = s->snpc, insertFtrace(rd, imm, BITS(s->isa.inst, 19, 15), s->pc, s->dnpc));
   INSTPAT("??????? ????? ????? ??? ????? 11011 11", jal, J, s->dnpc = s->pc + imm, R(rd) = s->snpc, insertFtrace(rd, imm, BITS(s->isa.inst, 19, 15), s->pc, s->dnpc));
 
+  INSTPAT("??????? ????? ????? 001 ????? 1110011", csrrw, I, csrrw_execute(src1, imm, rd));
+  INSTPAT("??????? ????? ????? 010 ????? 1110011", csrrs, I, csrrs_execute(src1, imm, rd));
+
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall, N, s->dnpc = ecallFunction(s->pc));
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret, N, s->dnpc = mretFunction());
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak, N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
 
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv, N, INV(s->pc));
