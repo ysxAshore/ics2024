@@ -5,6 +5,7 @@
 !/nexus-am/*
 !/nanos-lite/*
 !/navy-apps/*
+!/RT-Thread
 !Makefile
 !README.md
 !.gitignore

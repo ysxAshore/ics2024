@@ -1,0 +1,3 @@
+[submodule "RT-Thread"]
+	path = RT-Thread
+	url = git@github.com:NJU-ProjectN/rt-thread-am.git

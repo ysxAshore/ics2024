@@ -39,9 +39,19 @@ bool cte_init(Context *(*handler)(Event, Context *))
   return true;
 }
 
+extern void __am_asm_helper(void);
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg)
 {
-  return NULL;
+  Context *cp = (Context *)(kstack.end - sizeof(Context));
+
+  // 进程起始时的状态:
+  cp->mepc = (uintptr_t)entry - 0x4; // 陷入指令会给mepc+0x4 从而设置进程的起始PC
+  cp->mstatus = 0xa00001800;         // 也需要设置进程的mstauts 这里不用考虑RV32 因为强转的话取低32位即为0x1800
+  // a0~a7存参数 a0~a1存返回值
+  // cp->gpr[10] = (uintptr_t)entry;
+  cp->gpr[10] = (uintptr_t)arg;
+  // printf("%x\n", entry);
+  return cp;
 }
 
 void yield()
